@@ -17,8 +17,8 @@
 5. Para usar el Panel de Administración de Django, primero crear un superusuario con el comando en la terminal desde el directorio Backend\Backend:
 - python manage.py createsuperuser
 
-5. En la terminal desde el directorio Backend\Backend ejecutar el siguiente comando para iniciar el servidor de desarrollo:
+6. En la terminal desde el directorio Backend\Backend ejecutar el siguiente comando para iniciar el servidor de desarrollo:
 - python manage.py runserver
 
-6. Para acceder a la interfaz del Panel de Administración de Djando dirigirse al siguiente URL con las credenciales creadas en el paso 5.
+7. Para acceder a la interfaz del Panel de Administración de Djando dirigirse al siguiente URL con las credenciales creadas en el paso 5.
 - http://127.0.0.1:8000/admin
