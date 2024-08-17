@@ -4,7 +4,7 @@ CREATE TABLE `usuarios_usuario` (
  `nombre` varchar(100) NOT NULL,
  `correo_electronico` varchar(254) NOT NULL UNIQUE,
  `contrasena` varchar(255) NOT NULL,
- `rol` varchar(15) NOT NULL
+ `rol` varchar(15) NOT NULL -- Roles validos: Cliente, Profesional, Administrador
  );
  
 -- Create model Profesion
@@ -32,7 +32,7 @@ ALTER TABLE `profesionales_profesional`
 CREATE TABLE `citas_cita` (
 `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
  `fecha_hora` datetime(6) NOT NULL,
- `estado` varchar(15) NOT NULL,
+ `estado` varchar(15) NOT NULL, -- Estados validos: Agendada, Reprogramada, Cancelada
  `cliente_id` bigint NOT NULL,
  `profesional_id` bigint NOT NULL
  );
