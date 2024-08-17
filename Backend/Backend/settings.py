@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'usuarios',
     'profesiones',
     'profesionales',
+    'ubicaciones',
     'horarios',
     'citas',
 ]
