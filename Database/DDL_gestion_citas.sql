@@ -1,6 +1,6 @@
 -- Create model Usuario
 CREATE TABLE `usuarios_usuario` (
-`id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
+ `id` bigint AUTO_INCREMENT NOT NULL PRIMARY KEY,
  `nombre` varchar(100) NOT NULL,
  `correo_electronico` varchar(254) NOT NULL UNIQUE,
  `contrasena` varchar(255) NOT NULL,
