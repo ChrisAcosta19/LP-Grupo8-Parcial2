@@ -18,16 +18,19 @@ def citas_por_cliente(request, usuario_id):
 
 
 # Create your views here.
+from .models import Cita
 from .forms import CrearCitaParaCLienteForm
 
-def crear_cita_disponible(request, usuario_id):
+def crear_cita_para_cliente(request, usuario_id):
     if request.method == 'POST':
         form = CrearCitaParaCLienteForm(request.POST)
         if form.is_valid():
-            horario = form.save(commit=False)
-            horario.usuario_id = usuario_id
-            horario.save()
-            return redirect('horarios_por_profesional', usuario_id=usuario_id)
+            cita = form.save(commit=False)
+            cita.usuario_id = usuario_id
+            cita.save()
+            return redirect('citas_por_cliente', usuario_id=usuario_id)
     else:
         form = CrearCitaParaCLienteForm()
-    return render(request, 'horarios/crear_horario_disponible.html', {'form': form})
+
+    #return render(request, 'horarios/crear_horario_disponible.html', {'form': form})
+    return render(request, 'citas/crear_cita_clientes.html', {'form': form})
