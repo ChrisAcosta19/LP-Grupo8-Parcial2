@@ -23,6 +23,7 @@ from profesionales.views import asignar_profesion
 from profesiones.views import lista_profesiones
 from citas.views import citas_por_cliente
 from citas.views import crear_cita_para_cliente
+from citas.views import buscar_profesionales
 
 
 urlpatterns = [
@@ -38,5 +39,6 @@ urlpatterns = [
     path('usuarios/administradores/', lista_administradores, name='lista_administradores'),
     path('profesiones/lista/',lista_profesiones, name='lista_profesiones'),
     path('profesionales/asignar-profesion/', asignar_profesion, name='asignar_profesion'),
-    path('citas/cliente/<int:usuario_id>/', citas_por_cliente, name='citas_por_liente'),
+
+    path('usuarios/clientes/buscar-profesionales/', buscar_profesionales, name='buscar_profesionales'),
 ]

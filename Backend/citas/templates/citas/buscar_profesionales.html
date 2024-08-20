@@ -1,0 +1,13 @@
+<form method="get">
+    {{ form.as_p }}
+    <button type="submit">Buscar</button>
+</form>
+
+<h2>Resultados:</h2>
+<ul>
+    {% for profesional in profesionales %}
+        <li>{{ profesional.usuario.nombre }} - {{ profesional.profesion.nombre_profesion }} - {% if profesional.disponible %}Disponible{% else %}No Disponible{% endif %}</li>
+    {% empty %}
+        <li>No se encontraron profesionales.</li>
+    {% endfor %}
+</ul>

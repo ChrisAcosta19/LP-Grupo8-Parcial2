@@ -32,5 +32,27 @@ def crear_cita_para_cliente(request, usuario_id):
     else:
         form = CrearCitaParaCLienteForm()
 
-    #return render(request, 'horarios/crear_horario_disponible.html', {'form': form})
     return render(request, 'citas/crear_cita_clientes.html', {'form': form})
+
+# BUSQUEDA PROFESIONAL
+from .models import Profesional
+from .forms import BuscarProfesionalForm
+
+def buscar_profesionales(request):
+    form = BuscarProfesionalForm(request.GET or None)
+    profesionales = Profesional.objects.all()
+
+    if form.is_valid():
+        profesion = form.cleaned_data.get('profesion')
+        disponible = form.cleaned_data.get('disponible')
+
+        if profesion:
+            profesionales = profesionales.filter(profesion=profesion)
+        
+        #if disponible is not None:
+        #    profesionales = profesionales.filter(disponible=disponible)
+
+    return render(request, 'citas/buscar_profesionales.html', {
+        'form': form,
+        'profesionales': profesionales
+    })
