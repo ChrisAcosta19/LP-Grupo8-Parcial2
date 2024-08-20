@@ -21,6 +21,8 @@ from citas.views import citas_por_profesional
 from usuarios.views import crear_usuario, lista_usuarios, lista_cliente, lista_administradores
 from profesionales.views import asignar_profesion
 from profesiones.views import lista_profesiones
+from citas.views import citas_por_cliente
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,4 +35,5 @@ urlpatterns = [
     path('usuarios/administradores/', lista_administradores, name='lista_administradores'),
     path('profesiones/lista/',lista_profesiones, name='lista_profesiones'),
     path('profesionales/asignar-profesion/', asignar_profesion, name='asignar_profesion'),
+    path('citas/cliente/<int:usuario_id>/', citas_por_cliente, name='citas_por_liente'),
 ]
