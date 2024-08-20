@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Usuario</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crear Usuario</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div id="profesion-container" class="hidden">
+            <label for="id_profesion">Profesión:</label>
+            <select name="profesion" id="id_profesion">
+                <option value="" selected>---------</option>
+            </select>
+        </div>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var rolField = document.getElementById('id_rol');
+            var profesionContainer = document.getElementById('profesion-container');
+            var profesionSelect = document.getElementById('id_profesion');
+
+            // Oculta el campo de profesión por defecto
+            profesionContainer.classList.add('hidden');
+
+            // Función para cargar las profesiones
+            function loadProfesiones() {
+                fetch('/profesiones/lista/')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpia las opciones existentes
+                        profesionSelect.innerHTML = '<option value="" selected>---------</option>';
+                        // Añade nuevas opciones
+                        data.forEach(profesion => {
+                            var option = document.createElement('option');
+                            option.value = profesion.id;
+                            option.textContent = profesion.nombre_profesion;
+                            profesionSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error al cargar las profesiones:', error));
+            }
+
+            // Muestra el campo de profesión solo cuando el rol "Profesional" es seleccionado
+            rolField.addEventListener('change', function() {
+                var selectedRole = rolField.value;
+                if (selectedRole === 'Profesional') {
+                    profesionContainer.classList.remove('hidden');
+                    loadProfesiones(); // Carga las profesiones al mostrar el campo
+                } else {
+                    profesionContainer.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

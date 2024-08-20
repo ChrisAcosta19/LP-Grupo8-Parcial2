@@ -14,11 +14,13 @@
 - python manage.py makemigrations
 - python manage.py migrate
 
-5. Para usar el Panel de Administración de Django, primero crear un superusuario con el comando en la terminal desde el directorio Backend\Backend:
+5. Para poblar las tablas creadas en el paso 4, ejecutar el archivo Database\DML_gestion_citas.sql en MySQL Workbench.
+
+6. Para usar el Panel de Administración de Django, primero crear un superusuario con el comando en la terminal desde el directorio Backend:
 - python manage.py createsuperuser
 
-6. En la terminal desde el directorio Backend\Backend ejecutar el siguiente comando para iniciar el servidor de desarrollo:
+7. En la terminal desde el directorio Backend ejecutar el siguiente comando para iniciar el servidor de desarrollo:
 - python manage.py runserver
 
-7. Para acceder a la interfaz del Panel de Administración de Djando dirigirse al siguiente URL con las credenciales creadas en el paso 5.
+8. Para acceder a la interfaz del Panel de Administración de Djando dirigirse al siguiente URL con las credenciales creadas en el paso 5.
 - http://127.0.0.1:8000/admin
