@@ -1,5 +1,5 @@
 # LP-Grupo8-Parcial2
-## Pasos para ejecutar el proyecto
+## Pasos para ejecutar el Backend
 1. Intalar Django con el comando (si ya está instalado omita este paso) :
 - pip install django
 
@@ -24,3 +24,16 @@
 
 8. Para acceder a la interfaz del Panel de Administración de Djando dirigirse al siguiente URL con las credenciales creadas en el paso 5.
 - http://127.0.0.1:8000/admin
+
+## Pasos para ejecutar el Frontend
+1. Intalar Flutter en VS Code:
+- Windows: https://docs.flutter.dev/get-started/install/windows/web
+- Linux: https://docs.flutter.dev/get-started/install/linux/web
+- macOS: https://docs.flutter.dev/get-started/install/macos/web
+
+2. Instalar la extensión de Flutter para VS Code (en caso de no haberlo hecho en el paso 1).
+
+3. Abrir Frontend\gestion_citas\lib\main.dart en VSCode, pulsar F5 y elegir el navegador a usar (preferible Chrome).
+
+4. En caso de que el paso 3 falle, abrir la terminal en Frontend\gestion_citas y ejecutar el comando:
+- flutter run -d chrome
