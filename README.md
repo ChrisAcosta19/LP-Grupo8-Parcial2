@@ -33,7 +33,5 @@
 
 2. Instalar la extensión de Flutter para VS Code (en caso de no haberlo hecho en el paso 1).
 
-3. Abrir Frontend\gestion_citas\lib\main.dart en VSCode, pulsar F5 y elegir el navegador a usar (preferible Chrome).
-
-4. En caso de que el paso 3 falle, abrir la terminal en Frontend\gestion_citas y ejecutar el comando:
-- flutter run -d chrome
+3. Abrir la terminal en Frontend\gestion_citas y ejecutar el comando:
+- run_web.bat
