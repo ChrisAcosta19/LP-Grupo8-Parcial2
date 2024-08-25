@@ -38,3 +38,13 @@ def crear_usuario(request):
     else:
         form = UsuarioForm()
     return render(request, 'usuarios/crear_usuario.html', {'form': form})
+
+def usuario_por_id(request, usuario_id):
+    usuario = Usuario.objects.get(id=usuario_id)
+    data = {
+        'id': usuario.id,
+        'nombre': usuario.nombre,
+        'correo_electronico': usuario.correo_electronico,
+        'rol': usuario.rol
+    }
+    return JsonResponse(data, safe=False)

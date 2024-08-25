@@ -25,6 +25,7 @@ from profesiones.views import lista_profesiones
 from citas.views import citas_por_cliente
 from citas.views import crear_cita_para_cliente
 from citas.views import buscar_profesionales
+from usuarios.views import usuario_por_id
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +35,7 @@ urlpatterns = [
     path('profesional/<int:usuario_id>/profesiones/', consultar_profesiones, name='consultar_profesiones'),
     path('citas/crear/<int:usuario_id>/', crear_cita_para_cliente, name='crear_horario_disponible'),
     path('citas/cliente/<int:usuario_id>/', citas_por_cliente, name='citas_por_cliente'),
+    path('usuarios/<int:usuario_id>/buscar/', usuario_por_id, name='usuario_por_id'),
     path('usuarios/crear/', crear_usuario, name='crear_usuario'),
     path('usuarios/lista/', lista_usuarios, name='lista_usuarios'),
     path('usuarios/clientes/', lista_cliente, name='lista_cliente'),
