@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',  # Aplicación para habilitar CORS
 
     # Aplicaciones del proyecto
     'usuarios',
@@ -55,6 +56,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Middleware para habilitar CORS
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",  # Dominio de la aplicación Flutter
 ]
 
 ROOT_URLCONF = 'Backend.urls'
@@ -89,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gestion_citas',
         'USER': 'root',
-        'PASSWORD': 'root',
+        'PASSWORD': 'Cuborubik3/3',
         'HOST':'localhost',
         'PORT':'3306',
     }

@@ -14,7 +14,7 @@ INSERT INTO `profesionales_profesional` (`profesion_id`, `usuario_id`) VALUES
 
 INSERT INTO `horarios_horariodisponible` (`fecha`, `hora_inicio`, `hora_fin`, `profesional_id`) VALUES
 ('2024-08-17', '08:00:00.000000', '08:30:00.000000', 1),
-('2024-08-17', '08:30:00.000000', '09:00:00.000000', 1);
+('2024-08-17', '08:30:00.000000', '09:00:00.000000', 2);
 
 INSERT INTO `ubicaciones_ubicacion` (`direccion`, `profesional_id`) VALUES
 ('Oficina 1', 1),
