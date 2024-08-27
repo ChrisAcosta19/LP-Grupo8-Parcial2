@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
+import 'Administrador/ver_clientes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,7 +41,10 @@ class _MyHomePageState extends State<MyHomePage> {
   String? rolUsuario;
   String? opcionSeleccionada;
   dynamic fetchedData; // Variable para almacenar los datos obtenidos
-  dynamic fetchedUserData = {"nombre": "Nombre Usuario", "correo_electronico": "correo@example.com"}; // Variable para almacenar los datos del usuario
+  dynamic fetchedUserData = {
+    "nombre": "Nombre Usuario",
+    "correo_electronico": "correo@example.com"
+  }; // Variable para almacenar los datos del usuario
   String? selectedDate = '2024-01-01';
   String? selectedProfession;
   String? selectedHoraInicio = '00:00';
@@ -51,7 +55,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchData(String url) async {
     final response = await http.get(Uri.parse(url));
     fetchedData = List.empty(); // Limpiar los datos obtenidos
-    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
+    if (response.statusCode == 200 &&
+        !response.body.contains('<!DOCTYPE html>')) {
       setState(() {
         fetchedData = json.decode(response.body);
       });
@@ -61,7 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> fetchUserData(String url) async {
     final response = await http.get(Uri.parse(url));
     fetchedUserData = List.empty(); // Limpiar los datos obtenidos
-    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
+    if (response.statusCode == 200 &&
+        !response.body.contains('<!DOCTYPE html>')) {
       setState(() {
         fetchedUserData = json.decode(response.body);
       });
@@ -70,7 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final minute = time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
+    final minute =
+        time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
     return '$hour:$minute';
   }
 
@@ -91,15 +98,21 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Ver Horarios', Icons.access_time,
               'http://localhost:8000/profesional/$idUsuario/horarios/'),
           _buildMenuItem('Crear Horario', Icons.add,
-           'http://localhost:8000/profesional/$idUsuario/profesiones/'),
+              'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
           _buildMenuItem('Cancelar Cita', Icons.delete, ''),
         ];
         break;
       case 'Administrador':
         options = [
-          _buildMenuItem('Opción A', Icons.ac_unit, ''),
-          _buildMenuItem('Opción B', Icons.access_alarm, ''),
+          _buildMenuItem('Clientes', Icons.people,
+              'http://localhost:8000/usuarios/clientes/'),
+          _buildMenuItem('Profesionales', Icons.person,
+              'http://localhost:8000/administrador/$idUsuario/profesionales/'),
+          _buildMenuItem('Citas', Icons.calendar_today,
+              'http://localhost:8000/administrador/$idUsuario/citas/'),
+          _buildMenuItem('Perfil', Icons.person_outline,
+              'http://localhost:8000/administrador/$idUsuario/perfil/'),
         ];
         break;
       case 'Cliente':
@@ -152,7 +165,8 @@ class _MyHomePageState extends State<MyHomePage> {
               professionNames = [];
               try {
                 for (var profession in fetchedData) {
-                  professionNames.add(profession["profesion__nombre_profesion"]);
+                  professionNames
+                      .add(profession["profesion__nombre_profesion"]);
                 }
               } catch (e) {
                 // ignore: avoid_print
@@ -163,10 +177,9 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 Expanded(
                   flex: 2,
-                  child:
-                Row(
-                  children: [
-                    Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -184,7 +197,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ).then((selectedDateTime) {
                                     if (selectedDateTime != null) {
                                       setState(() {
-                                        selectedDate = formatDateTime(selectedDateTime);
+                                        selectedDate =
+                                            formatDateTime(selectedDateTime);
                                       });
                                     }
                                   });
@@ -228,7 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ).then((selectedTime) {
                                     if (selectedTime != null) {
                                       setState(() {
-                                        selectedHoraInicio = formatTimeOfDay(selectedTime);
+                                        selectedHoraInicio =
+                                            formatTimeOfDay(selectedTime);
                                       });
                                     }
                                   });
@@ -250,7 +265,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ).then((selectedTime) {
                                     if (selectedTime != null) {
                                       setState(() {
-                                        selectedHoraFin = formatTimeOfDay(selectedTime);
+                                        selectedHoraFin =
+                                            formatTimeOfDay(selectedTime);
                                       });
                                     }
                                   });
@@ -293,7 +309,22 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         break;
       case 'Administrador':
-        child = const Text('Menú de Administrador');
+        switch (opcionSeleccionada) {
+          case 'Clientes':
+            child = VerClientes(fetchedData: fetchedData); // Aquí se usa el widget VerClientes
+            break;
+          case 'Profesionales':
+            child = const Text('Todas las Profesionales (por implementar)');
+            break;
+          case 'Citas':
+            child = const Text('Todas las Citas (por implementar)');
+            break;
+          case 'Perfil':
+            child = const Text('Perfil del Administrador (por implementar)');
+            break;
+          default:
+            child = const Text('Opción no válida');
+        }
         break;
       case 'Cliente':
         child = const Text('Menú de Cliente');
@@ -318,8 +349,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         idUsuario = 1;
                         rolUsuario = 'Profesional';
                         opcionSeleccionada = 'Ver Citas';
-                        fetchData('http://localhost:8000/profesional/$idUsuario/citas/');
-                        fetchUserData('http://localhost:8000/usuarios/$idUsuario/buscar/');
+                        fetchData(
+                            'http://localhost:8000/profesional/$idUsuario/citas/');
+                        fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
                     },
                     child: const Text('Profesional'),
@@ -340,6 +373,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         idUsuario = 3;
                         rolUsuario = 'Administrador';
+                        opcionSeleccionada = 'Clientes';
+                        fetchData('http://localhost:8000/usuarios/clientes/');
+                        fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
                     },
                     child: const Text('Administrador'),
@@ -355,11 +392,25 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         UserAccountsDrawerHeader(
                           accountName: Text(fetchedUserData['nombre']),
-                          accountEmail: Text(fetchedUserData['correo_electronico']),
+                          accountEmail:
+                              Text(fetchedUserData['correo_electronico']),
                           currentAccountPicture: const CircleAvatar(
-                            backgroundImage: AssetImage('lib/images/avatar.png'),
+                            backgroundImage:
+                                AssetImage('lib/images/avatar.png'),
                           ),
                         ),
+                        if (rolUsuario == 'Administrador')
+                          const Padding(
+                            padding: EdgeInsets.all(8.0), // Ajustar el padding según sea necesario
+                            child: Text(
+                              'ADMINISTRADOR',
+                              style: TextStyle(
+                                fontSize: 16.0, // Tamaño de fuente ajustable
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red, // Color ajustable
+                              ),
+                            ),
+                          ),
                         Expanded(
                           child: ListView(
                             children: _buildMenuOptions(),
@@ -375,7 +426,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               opcionSeleccionada = null;
                               selectedProfession = null;
                               fetchedData = null;
-                              fetchedUserData = {"nombre": "Nombre Usuario", "correo_electronico": "correo@example.com"};
+                              fetchedUserData = {
+                                "nombre": "Nombre Usuario",
+                                "correo_electronico": "correo@example.com"
+                              };
                               selectedDate = '2024-01-01';
                               selectedHoraInicio = '00:00';
                               selectedHoraFin = '00:00';
