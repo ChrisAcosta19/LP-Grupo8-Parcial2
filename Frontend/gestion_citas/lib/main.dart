@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int? idUsuario;
   String? rolUsuario;
   String? opcionSeleccionada;
-  dynamic fetchedData; // Variable para almacenar los datos obtenidos
+  dynamic fetchedData = List.empty(); // Variable para almacenar los datos obtenidos
   dynamic fetchedUserData = {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> fetchUserData(String url) async {
     final response = await http.get(Uri.parse(url));
-    fetchedUserData = List.empty(); // Limpiar los datos obtenidos
     if (response.statusCode == 200 &&
         !response.body.contains('<!DOCTYPE html>')) {
       setState(() {
@@ -76,8 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final minute =
-        time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
+    final minute = time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
     return '$hour:$minute';
   }
 
@@ -107,12 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
         options = [
           _buildMenuItem('Clientes', Icons.people,
               'http://localhost:8000/usuarios/clientes/'),
-          _buildMenuItem('Profesionales', Icons.person,
-              'http://localhost:8000/administrador/$idUsuario/profesionales/'),
-          _buildMenuItem('Citas', Icons.calendar_today,
-              'http://localhost:8000/administrador/$idUsuario/citas/'),
-          _buildMenuItem('Perfil', Icons.person_outline,
-              'http://localhost:8000/administrador/$idUsuario/perfil/'),
+          _buildMenuItem('Profesionales', Icons.person, ''),
+          _buildMenuItem('Citas', Icons.calendar_today,''),
+          _buildMenuItem('Perfil', Icons.person_outline, ''),
         ];
         break;
       case 'Cliente':
@@ -165,8 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
               professionNames = [];
               try {
                 for (var profession in fetchedData) {
-                  professionNames
-                      .add(profession["profesion__nombre_profesion"]);
+                  professionNames.add(profession["profesion__nombre_profesion"]);
                 }
               } catch (e) {
                 // ignore: avoid_print
@@ -311,7 +305,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 'Administrador':
         switch (opcionSeleccionada) {
           case 'Clientes':
-            child = VerClientes(fetchedData: fetchedData); // Aquí se usa el widget VerClientes
+            child = VerClientes(fetchedData: fetchedData);
             break;
           case 'Profesionales':
             child = const Text('Todas las Profesionales (por implementar)');
@@ -363,6 +357,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         idUsuario = 2;
                         rolUsuario = 'Cliente';
+                        fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
                     },
                     child: const Text('Cliente'),
@@ -392,8 +388,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         UserAccountsDrawerHeader(
                           accountName: Text(fetchedUserData['nombre']),
-                          accountEmail:
-                              Text(fetchedUserData['correo_electronico']),
+                          accountEmail: Text(fetchedUserData['correo_electronico']),
                           currentAccountPicture: const CircleAvatar(
                             backgroundImage:
                                 AssetImage('lib/images/avatar.png'),
@@ -425,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               rolUsuario = null;
                               opcionSeleccionada = null;
                               selectedProfession = null;
-                              fetchedData = null;
+                              fetchedData = List.empty();
                               fetchedUserData = {
                                 "nombre": "Nombre Usuario",
                                 "correo_electronico": "correo@example.com"

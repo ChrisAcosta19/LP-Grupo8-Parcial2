@@ -2,7 +2,8 @@ USE gestion_citas;
 
 INSERT INTO `usuarios_usuario` (`nombre`, `correo_electronico`, `contrasena`, `rol`) VALUES
 ('Christopher Acosta', 'chriacos@espol.edu.ec', 'test123', 'Profesional'),
-('Peter Miranda', 'pemiplua@espol.edu.ec', 'test456', 'Cliente');
+('Peter Miranda', 'pemiplua@espol.edu.ec', 'test456', 'Cliente'),
+('Jefferson Eras', 'jeras@espol.edu.ec', 'test789', 'Administrador');
 
 INSERT INTO `profesiones_profesion` (`nombre_profesion`) VALUES
 ('Abogado'),

@@ -38,35 +38,35 @@ class _VerClientesState extends State<VerClientes> {
         final TextEditingController passwordController = TextEditingController();
 
         return AlertDialog(
-          title: Text('Agregar Nuevo Cliente'),
+          title: const Text('Agregar Nuevo Cliente'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: nombreController,
-                decoration: InputDecoration(labelText: 'Nombre'),
+                decoration: const InputDecoration(labelText: 'Nombre'),
               ),
               TextField(
                 controller: correoController,
-                decoration: InputDecoration(labelText: 'Correo Electrónico'),
+                decoration: const InputDecoration(labelText: 'Correo Electrónico'),
               ),
               TextField(
                 controller: passwordController,
                 obscureText: true, // Oculta el texto de la contraseña
-                decoration: InputDecoration(labelText: 'Contraseña'),
+                decoration: const InputDecoration(labelText: 'Contraseña'),
               ),
               // Agrega más campos según sea necesario
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('CANCELAR'),
+              child: const Text('CANCELAR'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('AGREGAR'),
+              child: const Text('AGREGAR'),
               onPressed: () {
                 final nombre = nombreController.text;
                 final correo = correoController.text;
@@ -110,17 +110,17 @@ class _VerClientesState extends State<VerClientes> {
             children: <Widget>[
               Expanded(
                 child: TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Buscar...',
                     border: OutlineInputBorder(),
                   ),
                   onChanged: _updateSearchQuery,
                 ),
               ),
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               ElevatedButton(
                 onPressed: _showAddClienteDialog,
-                child: Row(
+                child: const Row(
                   children: <Widget>[
                     Icon(Icons.add),
                     SizedBox(width: 4.0),
@@ -133,7 +133,7 @@ class _VerClientesState extends State<VerClientes> {
         ),
         Expanded(
           child: _clientes.isEmpty
-              ? Center(child: Text('No hay clientes'))
+              ? const Center(child: Text('No hay clientes'))
               : ListView.builder(
                   itemCount: _clientes.length,
                   itemBuilder: (context, index) {

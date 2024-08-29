@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 Widget verHorarios(fetchedData) {
-  return fetchedData == null
+  return fetchedData == List.empty()
       ? const Center(child: CircularProgressIndicator())
       : ListView.builder(
           itemCount: fetchedData!.length,

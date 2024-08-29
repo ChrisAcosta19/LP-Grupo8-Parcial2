@@ -4,6 +4,8 @@ import '../services/usuario_service.dart';
 import '../models/usuario.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -21,17 +23,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista de Usuarios'),
+        title: const Text('Lista de Usuarios'),
       ),
       body: FutureBuilder<List<Usuario>>(
         future: futureUsuarios,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No hay usuarios disponibles'));
+            return const Center(child: Text('No hay usuarios disponibles'));
           } else {
             final usuarios = snapshot.data!;
             return ListView.builder(
