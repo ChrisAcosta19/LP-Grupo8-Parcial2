@@ -96,8 +96,8 @@ DATABASES = {
         'NAME': 'gestion_citas',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST':'localhost',
-        'PORT':'3306',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
