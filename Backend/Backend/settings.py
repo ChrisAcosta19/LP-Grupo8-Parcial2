@@ -95,9 +95,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gestion_citas',
         'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'PASSWORD': 'Cuborubik3/3',
+        'HOST':'localhost',
+        'PORT':'3306',
     }
 }
 
