@@ -19,9 +19,8 @@ from django.urls import path
 from horarios.views import horarios_por_profesional, crear_horario_disponible
 from citas.views import citas_por_profesional
 from usuarios.views import crear_usuario, lista_usuarios, lista_cliente, lista_administradores, actualizar_usuario, eliminar_usuario
-from profesionales.views import asignar_profesion
-from profesionales.views import consultar_profesiones, lista_profesionales
-from profesiones.views import lista_profesiones, crear_profesion
+from profesionales.views import asignar_profesion, consultar_profesiones, lista_profesionales, obtener_id_profesional
+from profesiones.views import lista_profesiones, crear_profesion, consultar_profesion
 from citas.views import citas_por_cliente
 from citas.views import crear_cita_para_cliente
 from citas.views import buscar_profesionales
@@ -35,9 +34,11 @@ from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaci
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('profesional/<int:profesional_id>/horarios/', horarios_por_profesional, name='horarios_por_profesional'),
-    path('profesional/<int:profesional_id>/horarios/crear', crear_horario_disponible, name='crear_horario_disponible'),
+    path('profesional/<int:profesional_id>/horarios/crear/', crear_horario_disponible, name='crear_horario_disponible'),
     path('profesional/<int:profesional_id>/citas/', citas_por_profesional, name='citas_por_profesional'),
     path('profesional/<int:usuario_id>/profesiones/', consultar_profesiones, name='consultar_profesiones'),
+    path('profesional/<int:usuario_id>/profesion/<int:profesion_id>/', obtener_id_profesional, name='obtener_id_profesional'),
+    path('profesion/<str:nombre_profesion>/', consultar_profesion, name='consultar_profesion'),
     path('citas/crear/<int:usuario_id>/', crear_cita_para_cliente, name='crear_cita_para_cliente'),
     path('citas/cliente/<int:usuario_id>/', citas_por_cliente, name='citas_por_cliente'),
     path('usuarios/<int:usuario_id>/buscar/', usuario_por_id, name='usuario_por_id'),

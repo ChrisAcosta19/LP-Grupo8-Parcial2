@@ -22,3 +22,11 @@ def crear_profesion(request):
         form = ProfesionForm()
 
     return render(request, 'profesiones/crear_profesion.html', {'form': form})
+
+def consultar_profesion(request, nombre_profesion):
+    profesion = Profesion.objects.get(nombre_profesion=nombre_profesion)
+    data = {
+        'id': profesion.id,
+        'nombre_profesion': profesion.nombre_profesion,
+    }
+    return JsonResponse(data)

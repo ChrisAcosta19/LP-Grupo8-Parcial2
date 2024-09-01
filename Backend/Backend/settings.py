@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Middleware para habilitar CORS
+    'django.middleware.csrf.CsrfViewMiddleware', # Middleware para habilitar CSRF
 ]
 
 CORS_ALLOWED_ORIGINS = [

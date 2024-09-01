@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
 import 'Administrador/ver_clientes.dart';
+import 'Profesional/crear_horario.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,10 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
   }; // Variable para almacenar los datos del usuario
-  String? selectedDate = '2024-01-01';
+  String selectedDate = '2024-01-01';
   String? selectedProfession;
-  String? selectedHoraInicio = '00:00';
-  String? selectedHoraFin = '00:00';
+  String selectedHoraInicio = '00:00';
+  String selectedHoraFin = '00:00';
   List<String> professionNames = [];
 
   // Método para obtener datos desde el servidor
@@ -71,19 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
         fetchedUserData = json.decode(response.body);
       });
     }
-  }
-
-  String formatTimeOfDay(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final minute = time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
-    return '$hour:$minute';
-  }
-
-  String formatDateTime(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final month = date.month.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final year = date.year.toString();
-    return '$year-$month-$day';
   }
 
   List<Widget> _buildMenuOptions() {
@@ -167,129 +155,34 @@ class _MyHomePageState extends State<MyHomePage> {
                 print(e);
               }
             });
-            child = Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Date Picker
-                            const Text('Fecha:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101),
-                                  ).then((selectedDateTime) {
-                                    if (selectedDateTime != null) {
-                                      setState(() {
-                                        selectedDate =
-                                            formatDateTime(selectedDateTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar Fecha'),
-                              ),
-                            ),
-                            Text('Fecha elegida: $selectedDate'),
-                            const SizedBox(height: 150),
-                            const Text('Seleccione la profesión:'),
-                            DropdownButton<String>(
-                              value: selectedProfession,
-                              items: professionNames.map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedProfession = newValue;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Time Picker for Start Time
-                            const Text('Hora inicio:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  ).then((selectedTime) {
-                                    if (selectedTime != null) {
-                                      setState(() {
-                                        selectedHoraInicio =
-                                            formatTimeOfDay(selectedTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar hora inicio'),
-                              ),
-                            ),
-                            Text('Hora elegida: $selectedHoraInicio'),
-                            const SizedBox(height: 150),
-                            // Time Picker for End Time
-                            const Text('Hora fin:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  ).then((selectedTime) {
-                                    if (selectedTime != null) {
-                                      setState(() {
-                                        selectedHoraFin =
-                                            formatTimeOfDay(selectedTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar hora fin'),
-                              ),
-                            ),
-                            Text('Hora elegida: $selectedHoraFin'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                            onPressed: () {},
-                            child: const Row(children: [
-                              Icon(Icons.add),
-                              SizedBox(width: 10),
-                              Text('Crear Horario'),
-                            ])),
-                      ]),
-                ),
-              ],
+            child = crearHorario(
+              professionNames: professionNames,
+              selectedDate: selectedDate,
+              selectedProfession: selectedProfession,
+              selectedHoraInicio: selectedHoraInicio,
+              selectedHoraFin: selectedHoraFin,
+              context: context,
+              idUsuario: idUsuario,
+              onDateChanged: (newDate) {
+                setState(() {
+                  selectedDate = newDate;
+                });
+              },
+              onProfessionChanged: (newProfession) {
+                setState(() {
+                  selectedProfession = newProfession;
+                });
+              },
+              onHoraInicioChanged: (newHoraInicio) {
+                setState(() {
+                  selectedHoraInicio = newHoraInicio;
+                });
+              },
+              onHoraFinChanged: (newHoraFin) {
+                setState(() {
+                  selectedHoraFin = newHoraFin;
+                });
+              },
             );
             break;
           case 'Reprogramar Cita':
