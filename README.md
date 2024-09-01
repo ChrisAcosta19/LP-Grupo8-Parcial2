@@ -38,3 +38,4 @@
 
 3. Abrir la terminal en Frontend\gestion_citas y ejecutar el comando:
 - run_web.bat
+- .\run_web.bat
