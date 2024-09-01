@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
 import 'Administrador/ver_clientes.dart';
+import 'Cliente/ver_citas.dart';
 
 void main() {
   runApp(const MyApp());
@@ -112,9 +113,15 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       case 'Cliente':
         options = [
-          _buildMenuItem('Opción X', Icons.ac_unit, ''),
-          _buildMenuItem('Opción Y', Icons.access_alarm, ''),
-        ];
+          _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
+          _buildMenuItem('Agendar Citas', Icons.access_time, ''),
+              ///Code de relocalizacion
+          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
+              ///Code de relocalizacion
+          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+              ///Code de relocalizacion
+        ]; 
         break;
       default:
         options = [const Text('Seleccione un rol')];
@@ -321,8 +328,22 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         break;
       case 'Cliente':
-        child = const Text('Menú de Cliente');
-        break;
+        switch (opcionSeleccionada) {
+          case 'Ver Citas Agendadas':
+            child = verCitasClientes(fetchedData);
+            break;
+          case 'Agendar cita':
+            child = const Text('agendar Cita');
+            break;
+          case 'Reprogramar Cita':
+            child = const Text('Reprogramación de citas');
+            break;
+          case 'Cancelar Cita':
+            child = const Text('Cancelación de citas');
+            break;
+          default:
+            child = const Text('Opción no válida');
+        }
       default:
         child = const Text('Rol no válido');
     }
@@ -357,8 +378,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         idUsuario = 2;
                         rolUsuario = 'Cliente';
+                        opcionSeleccionada = 'Ver Citas Agendadas';
                         fetchUserData(
                             'http://localhost:8000/usuarios/$idUsuario/buscar/');
+                        fetchData(
+                            'http://localhost:8000/cliente/$idUsuario/citas/');
                       });
                     },
                     child: const Text('Cliente'),
