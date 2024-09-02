@@ -1,3 +1,5 @@
+-- DROP DATABASE IF EXISTS gestion_citas;
+-- CREATE DATABASE gestion_citas;
 USE gestion_citas;
 
 INSERT INTO `usuarios_usuario` (`nombre`, `correo_electronico`, `contrasena`, `rol`) VALUES
