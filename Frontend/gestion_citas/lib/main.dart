@@ -6,6 +6,7 @@ import 'Profesional/ver_horarios.dart';
 import 'Administrador/ver_clientes.dart';
 import 'Profesional/crear_horario.dart';
 import 'Cliente/ver_citas.dart';
+import 'Profesional/ver_ubicaciones.dart';
 
 void main() {
   runApp(const MyApp());
@@ -88,6 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
           _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Ver Ubicaciones', Icons.location_on,
+              'http://localhost:8000/profesional/$idUsuario/profesiones/'),
         ];
         break;
       case 'Administrador':
@@ -197,6 +200,20 @@ class _MyHomePageState extends State<MyHomePage> {
             break;
           case 'Cancelar Cita':
             child = const Text('Cancelación de citas');
+            break;
+          case 'Ver Ubicaciones':
+            setState(() {
+              professionNames = [];
+              try {
+                for (var profession in fetchedData) {
+                  professionNames.add(profession["profesion__nombre_profesion"]);
+                }
+              } catch (e) {
+                // ignore: avoid_print
+                print(e);
+              }
+            });
+            child = VerUbicaciones(idUsuario: idUsuario, professionNames: professionNames);
             break;
           default:
             child = const Text('Opción no válida');
