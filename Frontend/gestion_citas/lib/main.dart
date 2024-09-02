@@ -229,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child = verCitasClientes(fetchedData);
             break;
           case 'Agendar Cita':
-            child = AgendarCita(); // Asegúrate de inicializar el widget
+            child = AgendarCita(idUsuario.toString()); //Obtencion de id para crear la cita, esto para que se consistente con mi back-end :c
             break;
           case 'Reprogramar Cita':
             child = const Text('Reprogramación de citas');
@@ -272,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        idUsuario = 2;
+                        idUsuario = 4;
                         rolUsuario = 'Cliente';
                         opcionSeleccionada = 'Ver Citas Agendadas';
                         fetchUserData(

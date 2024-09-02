@@ -32,15 +32,42 @@ def citas_por_cliente(request, usuario_id):
                              'profesional__profesion__nombre_profesion', 'estado'))
     return JsonResponse(data, safe=False)
 
+#### CREA CITA PARA CLIENTES ####
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def crear_cita_para_cliente(request, usuario_id):
     if request.method == 'POST':
+        print(request.POST)  #haber que llega :c (NO OLVIDAR ELIMINAR Peter)
+
         form = CrearCitaParaCLienteForm(request.POST)
         if form.is_valid():
+            print("entró")
             cita = form.save(commit=False)
             cita.usuario_id = usuario_id
+            cita.cliente_id = request.POST.get('cliente')  # Esto asigna cliente dinámico
+
+            # Filtro horarios disponibles por profesional
+            horarios_disponibles = HorarioDisponible.objects.filter(
+                profesional=cita.profesional,
+                fecha=cita.fecha,
+                hora_inicio=cita.hora_inicio
+            )
+            print(cita.profesional),
+            print(cita.fecha),
+            print(cita.hora_inicio),
+            print(horarios_disponibles) #Estará filtrando?
+            
+            # Si se crea cita, eliminarlo horario
+            if horarios_disponibles.exists():
+                horarios_disponibles.delete()
+            else:
+                print("XD NO SE ELIMINÓ")
+
             cita.save()
             return redirect('citas_por_cliente', usuario_id=usuario_id)
+        print("Form no Válido")
+
     else:
         form = CrearCitaParaCLienteForm()
 
