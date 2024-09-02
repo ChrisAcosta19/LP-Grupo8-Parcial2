@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_citas/Cliente/agendar_citas.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Profesional/ver_citas.dart';
@@ -106,11 +107,13 @@ class _MyHomePageState extends State<MyHomePage> {
         options = [
           _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today, 
               'http://localhost:8000/cliente/$idUsuario/citas/'),
-          _buildMenuItem('Agendar Citas', Icons.access_time, ''),
+          _buildMenuItem('Agendar Cita', Icons.access_time, 
+              'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
+          _buildMenuItem('Reprogramar Cita', Icons.edit, 
+              ''),
               ///Code de relocalizacion
-          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-              ///Code de relocalizacion
-          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Cancelar Cita', Icons.delete, 
+          ''),
               ///Code de relocalizacion
         ]; 
         break;
@@ -242,8 +245,8 @@ class _MyHomePageState extends State<MyHomePage> {
           case 'Ver Citas Agendadas':
             child = verCitasClientes(fetchedData);
             break;
-          case 'Agendar cita':
-            child = const Text('agendar Cita');
+          case 'Agendar Cita':
+            child = AgendarCita(); // Asegúrate de inicializar el widget
             break;
           case 'Reprogramar Cita':
             child = const Text('Reprogramación de citas');

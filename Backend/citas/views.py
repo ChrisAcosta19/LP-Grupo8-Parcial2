@@ -67,7 +67,6 @@ def buscar_profesionales(request):
         'profesionales': profesionales
     })
 
-
 def obtener_profesionales_por_profesion(request, profesion_id):
     profesionales = Profesional.objects.filter(profesion_id=profesion_id).select_related('usuario')
     data = list(profesionales.values('id', 'usuario__nombre'))
@@ -95,13 +94,19 @@ def buscar_horarios_por_profesional(request):
             profesionales = profesionales.filter(id=profesional.id)
 
     horarios = HorarioDisponible.objects.filter(profesional__in=profesionales)
+    
+    data = list(horarios.values('id', 'fecha', 'hora_inicio', 'hora_fin', 'profesional__profesion__nombre_profesion'))
 
+    
+    return JsonResponse(data, safe=False)
+    """
     return render(request, 'citas/buscar_horarios.html', {
         'form': form,
         'profesionales': profesionales,
         'horarios': horarios,
     })
-
+    """
+    
 
 def obtener_ubicaciones_y_horarios(request, profesional_id):
     ubicaciones = Ubicacion.objects.filter(profesional_id=profesional_id)
