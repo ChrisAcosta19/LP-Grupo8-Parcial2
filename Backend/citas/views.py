@@ -211,3 +211,28 @@ def lista_citas_admin(request):
 
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
+
+### ELIMINAR CITAS ###
+from django.shortcuts import get_object_or_404, redirect
+
+@csrf_exempt
+def cancelar_cita_y_crear_horario(request, cita_id):
+    try:
+        # Obtener la cita a cancelar
+        cita = get_object_or_404(Cita, id=cita_id)
+
+        # Eliminar la cita
+        cita.delete()
+
+        # Crear un nuevo horario disponible
+        HorarioDisponible.objects.create(
+            profesional=cita.profesional,
+            fecha=cita.fecha,
+            hora_inicio=cita.hora_inicio,
+            hora_fin=cita.hora_fin
+        )
+
+        return JsonResponse({'message': 'Cita cancelada y horario disponible creado exitosamente.'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)    

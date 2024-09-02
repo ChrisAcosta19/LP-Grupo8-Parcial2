@@ -31,6 +31,7 @@ from citas.views import lista_citas_admin
 from usuarios.views import usuario_por_id
 from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones, listar_ubicaciones_id_usuario, crear_ubicacion_sin_form
 from citas.views import buscar_horarios_por_profesional
+from citas.views import cancelar_cita_y_crear_horario
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -65,5 +66,6 @@ urlpatterns = [
     path('administrador/crear_cita/', crear_cita_admin, name='crear_cita_admin'),
     path('administrador/lista_citas/', lista_citas_admin, name='lista_citas_admin'),
 
-    path('usuarios/citas/horarios_disponibles', buscar_horarios_por_profesional, name='obtener_horarios_por_profesionales')
+    path('usuarios/citas/horarios_disponibles', buscar_horarios_por_profesional, name='obtener_horarios_por_profesionales'),
+    path('usuario/citas/<int:cita_id>/', cancelar_cita_y_crear_horario, name='cancelar_cita_y_crear_horario'),
 ]

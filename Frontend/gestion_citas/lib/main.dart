@@ -8,6 +8,7 @@ import 'Administrador/ver_clientes.dart';
 import 'Profesional/crear_horario.dart';
 import 'Cliente/ver_citas.dart';
 import 'Profesional/ver_ubicaciones.dart';
+import 'Cliente/eliminar_cita.dart';
 
 void main() {
   runApp(const MyApp());
@@ -113,11 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Agendar Cita', Icons.access_time,
               'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-
           ///Code de relocalizacion
-          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
-
-          ///Code de relocalizacion
+          _buildMenuItem('Cancelar Cita', Icons.delete, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
         ];
         break;
       default:
@@ -246,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child = const Text('Reprogramación de citas');
             break;
           case 'Cancelar Cita':
-            child = const Text('Cancelación de citas');
+            child = CancelarCitaScreen(fetchedData: fetchedData);
             break;
           default:
             child = const Text('Opción no válida');
@@ -283,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () async {
                       setState(() {
-                        idUsuario = 4;
+                        idUsuario = 2;
                         rolUsuario = 'Cliente';
                         opcionSeleccionada = 'Ver Citas Agendadas';  
                       });
