@@ -29,16 +29,18 @@ from citas.views import obtener_ubicaciones_y_horarios
 from citas.views import crear_cita_admin
 from citas.views import lista_citas_admin
 from usuarios.views import usuario_por_id
-from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones
+from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones, listar_ubicaciones_id_usuario, crear_ubicacion_sin_form
 from citas.views import buscar_horarios_por_profesional
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('profesional/<int:profesional_id>/horarios/', horarios_por_profesional, name='horarios_por_profesional'),
     path('profesional/<int:profesional_id>/horarios/crear/', crear_horario_disponible, name='crear_horario_disponible'),
+    path('profesional/<int:profesional_id>/ubicaciones/crear/', crear_ubicacion_sin_form, name='crear_ubicacion_sin_form'),
     path('profesional/<int:profesional_id>/citas/', citas_por_profesional, name='citas_por_profesional'),
     path('profesional/<int:usuario_id>/profesiones/', consultar_profesiones, name='consultar_profesiones'),
     path('profesional/<int:usuario_id>/profesion/<int:profesion_id>/', obtener_id_profesional, name='obtener_id_profesional'),
+    path('profesional/<int:usuario_id>/ubicaciones/', listar_ubicaciones_id_usuario, name='listar_ubicaciones_id_usuario'),
     path('profesion/<str:nombre_profesion>/', consultar_profesion, name='consultar_profesion'),
     path('cliente/<int:usuario_id>/citas/crear', crear_cita_para_cliente, name='crear_cita_para_cliente'),
     path('cliente/<int:usuario_id>/citas/', citas_por_cliente, name='citas_por_cliente'),

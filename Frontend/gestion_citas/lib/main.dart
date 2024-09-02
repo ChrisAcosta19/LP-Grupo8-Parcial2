@@ -7,6 +7,7 @@ import 'Profesional/ver_horarios.dart';
 import 'Administrador/ver_clientes.dart';
 import 'Profesional/crear_horario.dart';
 import 'Cliente/ver_citas.dart';
+import 'Profesional/ver_ubicaciones.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,7 +44,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int? idUsuario;
   String? rolUsuario;
   String? opcionSeleccionada;
-  dynamic fetchedData = List.empty(); // Variable para almacenar los datos obtenidos
+  dynamic fetchedData =
+      List.empty(); // Variable para almacenar los datos obtenidos
   dynamic fetchedUserData = {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
@@ -56,8 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Método para obtener datos desde el servidor
   Future<void> fetchData(String url) async {
+    setState(() {
+      fetchedData = List.empty(); // Limpiar los datos obtenidos
+    });
     final response = await http.get(Uri.parse(url));
-    fetchedData = List.empty(); // Limpiar los datos obtenidos
     if (response.statusCode == 200 &&
         !response.body.contains('<!DOCTYPE html>')) {
       setState(() {
@@ -89,6 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
           _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Ver Ubicaciones', Icons.location_on,
+              'http://localhost:8000/profesional/$idUsuario/profesiones/'),
         ];
         break;
       case 'Administrador':
@@ -96,23 +102,23 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Clientes', Icons.people,
               'http://localhost:8000/usuarios/clientes/'),
           _buildMenuItem('Profesionales', Icons.person, ''),
-          _buildMenuItem('Citas', Icons.calendar_today,''),
+          _buildMenuItem('Citas', Icons.calendar_today, ''),
           _buildMenuItem('Perfil', Icons.person_outline, ''),
         ];
         break;
       case 'Cliente':
         options = [
-          _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today, 
+          _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today,
               'http://localhost:8000/cliente/$idUsuario/citas/'),
-          _buildMenuItem('Agendar Cita', Icons.access_time, 
+          _buildMenuItem('Agendar Cita', Icons.access_time,
               'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
-          _buildMenuItem('Reprogramar Cita', Icons.edit, 
-              ''),
-              ///Code de relocalizacion
-          _buildMenuItem('Cancelar Cita', Icons.delete, 
-          ''),
-              ///Code de relocalizacion
-        ]; 
+          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
+
+          ///Code de relocalizacion
+          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+
+          ///Code de relocalizacion
+        ];
         break;
       default:
         options = [const Text('Seleccione un rol')];
@@ -132,11 +138,11 @@ class _MyHomePageState extends State<MyHomePage> {
           color: opcionSeleccionada == title ? Colors.white : Colors.black,
         ),
       ),
-      onTap: () {
+      onTap: () async {
         setState(() {
           opcionSeleccionada = title;
-          fetchData(url);
         });
+        await fetchData(url);
       },
     );
   }
@@ -156,13 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
           case 'Crear Horario':
             setState(() {
               professionNames = [];
-              try {
-                for (var profession in fetchedData) {
-                  professionNames.add(profession["profesion__nombre_profesion"]);
-                }
-              } catch (e) {
-                // ignore: avoid_print
-                print(e);
+              for (var profession in fetchedData) {
+                professionNames.add(profession["profesion__nombre_profesion"]);
               }
             });
             child = crearHorario(
@@ -200,6 +201,16 @@ class _MyHomePageState extends State<MyHomePage> {
             break;
           case 'Cancelar Cita':
             child = const Text('Cancelación de citas');
+            break;
+          case 'Ver Ubicaciones':
+            setState(() {
+              professionNames = [];
+              for (var profession in fetchedData) {
+                professionNames.add(profession["profesion__nombre_profesion"]);
+              }
+            });
+            child = VerUbicaciones(
+                idUsuario: idUsuario, professionNames: professionNames);
             break;
           default:
             child = const Text('Opción no válida');
@@ -255,45 +266,45 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         idUsuario = 1;
                         rolUsuario = 'Profesional';
                         opcionSeleccionada = 'Ver Citas';
-                        fetchData(
-                            'http://localhost:8000/profesional/$idUsuario/citas/');
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
+                      await fetchData(
+                          'http://localhost:8000/profesional/$idUsuario/citas/');
+                      await fetchUserData(
+                          'http://localhost:8000/usuarios/$idUsuario/buscar/');
                     },
                     child: const Text('Profesional'),
                   ),
                   const SizedBox(width: 20), // Espacio entre los botones
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         idUsuario = 4;
                         rolUsuario = 'Cliente';
-                        opcionSeleccionada = 'Ver Citas Agendadas';
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
-                        fetchData(
-                            'http://localhost:8000/cliente/$idUsuario/citas/');
+                        opcionSeleccionada = 'Ver Citas Agendadas';  
                       });
+                      await fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
+                      await fetchData(
+                            'http://localhost:8000/cliente/$idUsuario/citas/');
                     },
                     child: const Text('Cliente'),
                   ),
                   const SizedBox(width: 20), // Espacio entre los botones
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         idUsuario = 3;
                         rolUsuario = 'Administrador';
                         opcionSeleccionada = 'Clientes';
-                        fetchData('http://localhost:8000/usuarios/clientes/');
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
+                      await fetchData('http://localhost:8000/usuarios/clientes/');
+                      await fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                     },
                     child: const Text('Administrador'),
                   ),
@@ -308,7 +319,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         UserAccountsDrawerHeader(
                           accountName: Text(fetchedUserData['nombre']),
-                          accountEmail: Text(fetchedUserData['correo_electronico']),
+                          accountEmail:
+                              Text(fetchedUserData['correo_electronico']),
                           currentAccountPicture: const CircleAvatar(
                             backgroundImage:
                                 AssetImage('lib/images/avatar.png'),
@@ -316,7 +328,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         if (rolUsuario == 'Administrador')
                           const Padding(
-                            padding: EdgeInsets.all(8.0), // Ajustar el padding según sea necesario
+                            padding: EdgeInsets.all(
+                                8.0), // Ajustar el padding según sea necesario
                             child: Text(
                               'ADMINISTRADOR',
                               style: TextStyle(
