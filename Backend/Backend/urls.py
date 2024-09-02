@@ -63,5 +63,5 @@ urlpatterns = [
     path('administrador/crear_cita/', crear_cita_admin, name='crear_cita_admin'),
     path('administrador/lista_citas/', lista_citas_admin, name='lista_citas_admin'),
 
-    path('usuarios/citas/buscar_cita_por_profesion.html', buscar_horarios_por_profesional, name='obtener_horarios_por_profesionales')
+    path('usuarios/citas/horarios_disponibles', buscar_horarios_por_profesional, name='obtener_horarios_por_profesionales')
 ]
