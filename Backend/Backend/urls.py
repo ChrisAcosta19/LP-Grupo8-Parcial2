@@ -22,29 +22,19 @@ from profesionales.views import asignar_profesion, consultar_profesiones, lista_
 from profesiones.views import lista_profesiones, crear_profesion, consultar_profesion
 from citas.views import citas_por_cliente, citas_por_profesional, crear_cita_para_cliente, buscar_profesionales, obtener_profesionales_por_profesion, obtener_ubicaciones_y_horarios,crear_cita_admin,lista_citas_admin, buscar_horarios_por_profesional, update_cita, cancelar_cita
 from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones, listar_ubicaciones_id_usuario, crear_ubicacion_sin_form, listar_ubicaciones_id_profesional
-from citas.views import citas_por_cliente
-from citas.views import crear_cita_para_cliente
-from citas.views import buscar_profesionales
-from citas.views import obtener_profesionales_por_profesion
-from citas.views import obtener_ubicaciones_y_horarios
-from citas.views import crear_cita_admin
-from citas.views import lista_citas_admin
-from usuarios.views import usuario_por_id
-# from usuarios.views import asignar_profesion
 from ubicaciones.views import actualizar_ubicacion
-from usuarios.views import crear_usuario, crear_cliente, crear_profesional, lista_usuarios, lista_cliente, lista_administradores, actualizar_usuario, eliminar_usuario, obtener_id_usuario, actualizar_profesion, eliminar_profesion, eliminar_ubicacion2, eliminar_profesional
-from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones, listar_ubicaciones_id_usuario, crear_ubicacion_sin_form
-from citas.views import buscar_horarios_por_profesional
+from usuarios.views import crear_cliente, crear_profesional, obtener_id_usuario, actualizar_profesion, eliminar_ubicacion2
 from citas.views import cancelar_cita_y_crear_horario
+
 # vistas que usan los administradores
 from usuarios.views import lista_profesionales_admin
-from profesiones.views import crear_profesion, actualizar_profesion_admin, eliminar_profesion
+from profesiones.views import actualizar_profesion_admin, eliminar_profesion
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('profesional/<int:usuario_id>/horarios/', horarios_por_profesional, name='horarios_por_profesional'),
-    path('profesional/<int:profesional_id>/horarios/crear/', crear_horario_disponible, name='crear_horario_disponible'),
+    path('profesional/<int:profesional_id>/horarios/crear/', crear_horario_disponible, name='crear_horario_disponible'),    
     path('profesional/<int:profesional_id>/ubicaciones/crear/', crear_ubicacion_sin_form, name='crear_ubicacion_sin_form'),
     path('profesional/<int:usuario_id>/ubicaciones/', listar_ubicaciones_id_usuario, name='listar_ubicaciones_id_usuario'),
     path('profesional/<int:profesional_id>/ubicacionesProfesional/', listar_ubicaciones_id_profesional, name='listar_ubicaciones_id_profesional'),
@@ -82,8 +72,6 @@ urlpatterns = [
     path('ubicaciones_horarios/<int:profesional_id>/', obtener_ubicaciones_y_horarios, name='obtener_ubicaciones_y_horarios'),
     path('administrador/crear_cita/', crear_cita_admin, name='crear_cita_admin'),
     path('administrador/lista_citas/', lista_citas_admin, name='lista_citas_admin'),
-    path('usuarios/eliminar2/<int:id>/', eliminar_profesional, name='eliminar_profesional'),
-    path('usuarios/eliminar_profesion2/<int:id>/', eliminar_profesion, name='eliminar_profesion'),
     path('ubicaciones/eliminar_ubicacion2/<int:ubicacion_id>/', eliminar_ubicacion2, name='eliminar_ubicacion2'),
     path('usuarios/citas/horarios_disponibles', buscar_horarios_por_profesional, name='obtener_horarios_por_profesionales'),
     path('usuario/citas/<int:cita_id>/', cancelar_cita_y_crear_horario, name='cancelar_cita_y_crear_horario'),

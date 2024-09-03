@@ -116,8 +116,9 @@ DATABASES = {
         'NAME': 'gestion_citas',
         'USER': 'root',
         'PASSWORD': 'Cuborubik3/3',
-        'HOST':'localhost',
-        'PORT':'3306',
+        # 'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 

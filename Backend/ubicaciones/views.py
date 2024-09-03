@@ -2,7 +2,6 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from usuarios.models import Usuario
 from .models import Ubicacion
 import json
 
@@ -94,12 +93,10 @@ def listar_ubicaciones_id_usuario(request, usuario_id):
     
     # Convertir los datos a una lista de diccionarios
     data = list(ubicaciones.values('id', 'direccion', 'profesional__profesion__nombre_profesion'))
-    
+
     # Devolver los datos como una respuesta JSON
-<<<<<<< HEAD
     return JsonResponse(data, safe=False)
-=======
-    return JsonResponse(data, safe=False)
+
 
 def listar_ubicaciones_id_profesional(request, profesional_id):
     # Obtener todas las ubicaciones de un profesional específico
@@ -110,4 +107,4 @@ def listar_ubicaciones_id_profesional(request, profesional_id):
     
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
->>>>>>> 02481606778e42bc3d61ed3d015145a4132280a5
+

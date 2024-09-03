@@ -78,9 +78,8 @@ def citas_por_cliente(request, usuario_id):
                              'profesional__profesion__nombre_profesion', 'estado'))
     return JsonResponse(data, safe=False)
 
-#### CREA CITA PARA CLIENTES ####
-from django.views.decorators.csrf import csrf_exempt
 
+# ### CREA CITA PARA CLIENTES #### #
 @csrf_exempt
 def crear_cita_para_cliente(request, usuario_id):
     if request.method == 'POST':
