@@ -4,10 +4,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
-import 'Administrador/ver_clientes.dart';
 import 'Profesional/crear_horario.dart';
-import 'Cliente/ver_citas.dart';
 import 'Profesional/ver_ubicaciones.dart';
+import 'Profesional/reprogramar_cita.dart';
+import 'Profesional/cancelar_cita.dart';
+import 'Administrador/ver_clientes.dart';
+import 'Cliente/ver_citas.dart';
 import 'Cliente/eliminar_cita.dart';
 import 'Cliente/reagendar_citas.dart';
 
@@ -46,8 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int? idUsuario;
   String? rolUsuario;
   String? opcionSeleccionada;
-  dynamic fetchedData =
-      List.empty(); // Variable para almacenar los datos obtenidos
+  dynamic fetchedData = List.empty(); // Variable para almacenar los datos obtenidos
   dynamic fetchedUserData = {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
@@ -94,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Crear Horario', Icons.add,
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Cancelar Cita', Icons.delete,''),
           _buildMenuItem('Ver Ubicaciones', Icons.location_on,
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
         ];
@@ -197,10 +198,10 @@ class _MyHomePageState extends State<MyHomePage> {
             );
             break;
           case 'Reprogramar Cita':
-            child = const Text('Reprogramación de citas');
+            child = ReprogramarCitas(idUsuario: idUsuario);
             break;
           case 'Cancelar Cita':
-            child = const Text('Cancelación de citas');
+            child = CancelarCitas(idUsuario: idUsuario);
             break;
           case 'Ver Ubicaciones':
             setState(() {
@@ -209,8 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 professionNames.add(profession["profesion__nombre_profesion"]);
               }
             });
-            child = VerUbicaciones(
-                idUsuario: idUsuario, professionNames: professionNames);
+            child = VerUbicaciones(idUsuario: idUsuario, professionNames: professionNames);
             break;
           default:
             child = const Text('Opción no válida');

@@ -5,20 +5,66 @@ from ubicaciones.models import Ubicacion
 from horarios.models import HorarioDisponible
 from .forms import BuscarProfesionalForm
 from .forms import BuscarHorariosPorProfesional
-
 from .forms import CrearCitaParaCLienteForm
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+import json
 
+@csrf_exempt
+def update_cita(request, cita_id):
+    if request.method == 'PATCH':
+        try:
+            cita = get_object_or_404(Cita, id=cita_id)
+            data = json.loads(request.body)
 
-def citas_por_profesional(request, profesional_id):
+            # Actualizar solo los campos que están presentes en la solicitud
+            if 'fecha' in data:
+                cita.fecha = data['fecha']
+            if 'hora_inicio' in data:
+                cita.hora_inicio = data['hora_inicio']
+            if 'hora_fin' in data:
+                cita.hora_fin = data['hora_fin']
+            if 'ubicacion' in data:
+                ubicacion = get_object_or_404(Ubicacion, id=data['ubicacion'])
+                cita.ubicacion = ubicacion
+
+            cita.save()
+            return JsonResponse({
+                'id': cita.id,
+                'fecha': cita.fecha,
+                'hora_inicio': cita.hora_inicio,
+                'hora_fin': cita.hora_fin,
+                'ubicacion': cita.ubicacion.id,
+            }, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+@csrf_exempt
+def cancelar_cita(request, cita_id):
+    if request.method == 'PATCH':
+        try:
+            cita = get_object_or_404(Cita, id=cita_id)
+            cita.estado = 'Cancelada'
+            cita.save()
+            return JsonResponse({'message': 'Cita cancelada con éxito.'}, status=200)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+def citas_por_profesional(request, usuario_id):
     # Obtener todas las citas relacionadas con el profesional
-    citas = Cita.objects.filter(profesional__usuario_id=profesional_id)
+    citas = Cita.objects.filter(profesional__usuario_id=usuario_id)
     
     if not citas:
         raise Http404("No hay citas para este profesional.")
 
     # Convertir los datos a una lista de diccionarios
     data = list(citas.values('id', 'fecha', 'hora_inicio', 'hora_fin', 'ubicacion__direccion',
-                             'cliente__nombre', 'profesional__usuario__nombre',
+                             'cliente__nombre', 'profesional__usuario__nombre', 'profesional_id',
                              'profesional__profesion__nombre_profesion', 'estado'))
     
     # Devolver los datos como una respuesta JSON

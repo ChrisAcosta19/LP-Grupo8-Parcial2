@@ -34,8 +34,8 @@ class _VerUbicacionesState extends State<VerUbicaciones> {
     super.dispose();
   }
 
-  Future<void> _fetchUbicaciones(int? idProfesional) async {
-    final urlUbicaciones = Uri.parse('http://localhost:8000/profesional/$idProfesional/ubicaciones/');
+  Future<void> _fetchUbicaciones(int? idUsuario) async {
+    final urlUbicaciones = Uri.parse('http://localhost:8000/profesional/$idUsuario/ubicaciones/');
     try {
       final response = await http.get(urlUbicaciones);
       if (response.statusCode == 200) {

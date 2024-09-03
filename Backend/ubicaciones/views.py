@@ -57,3 +57,13 @@ def listar_ubicaciones_id_usuario(request, usuario_id):
     
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
+
+def listar_ubicaciones_id_profesional(request, profesional_id):
+    # Obtener todas las ubicaciones de un profesional específico
+    ubicaciones = Ubicacion.objects.filter(profesional_id=profesional_id)
+    
+    # Convertir los datos a una lista de diccionarios
+    data = list(ubicaciones.values('id', 'direccion', 'profesional__profesion__nombre_profesion'))
+    
+    # Devolver los datos como una respuesta JSON
+    return JsonResponse(data, safe=False)

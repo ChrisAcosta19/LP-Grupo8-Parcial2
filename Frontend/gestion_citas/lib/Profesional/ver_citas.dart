@@ -10,8 +10,13 @@ Widget verCitas(fetchedData) {
             return Card(
               margin: const EdgeInsets.all(8.0),
               child: ListTile(
-                title: Text(
-                    'Servicios de ${cita["profesional__profesion__nombre_profesion"]}'),
+                title: Row(
+                  children: [
+                    Text('Servicios de ${cita["profesional__profesion__nombre_profesion"]}'),
+                    const Spacer(),
+                    Text('${cita["estado"]}'),
+                  ],
+                ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
