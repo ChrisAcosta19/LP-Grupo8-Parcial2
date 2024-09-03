@@ -4,15 +4,18 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
-import 'Administrador/ver_clientes.dart';
 import 'Administrador/ver_profesionales.dart';
 import 'Administrador/ver_profesiones.dart';
 import 'Administrador/ver_citasAdmin.dart';
 import 'Administrador/ver_perfil.dart';
 import 'Profesional/crear_horario.dart';
-import 'Cliente/ver_citas.dart';
 import 'Profesional/ver_ubicaciones.dart';
+import 'Profesional/reprogramar_cita.dart';
+import 'Profesional/cancelar_cita.dart';
+import 'Administrador/ver_clientes.dart';
+import 'Cliente/ver_citas.dart';
 import 'Cliente/eliminar_cita.dart';
+import 'Cliente/reagendar_citas.dart';
 
 
 void main() {
@@ -50,8 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int? idUsuario;
   String? rolUsuario;
   String? opcionSeleccionada;
-  dynamic fetchedData =
-      List.empty(); // Variable para almacenar los datos obtenidos
+  dynamic fetchedData = List.empty(); // Variable para almacenar los datos obtenidos
   dynamic fetchedUserData = {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
@@ -99,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Crear Horario', Icons.add,
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Cancelar Cita', Icons.delete,''),
           _buildMenuItem('Ver Ubicaciones', Icons.location_on,
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
         ];
@@ -124,8 +126,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'http://localhost:8000/cliente/$idUsuario/citas/'),
           _buildMenuItem('Agendar Cita', Icons.access_time,
               'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
-          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-          ///Code de relocalizacion
+          _buildMenuItem('Reprogramar Cita', Icons.edit, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
           _buildMenuItem('Cancelar Cita', Icons.delete, 
               'http://localhost:8000/cliente/$idUsuario/citas/'),
         ];
@@ -207,10 +209,10 @@ class _MyHomePageState extends State<MyHomePage> {
             );
             break;
           case 'Reprogramar Cita':
-            child = const Text('Reprogramación de citas');
+            child = ReprogramarCitas(idUsuario: idUsuario);
             break;
           case 'Cancelar Cita':
-            child = const Text('Cancelación de citas');
+            child = CancelarCitas(idUsuario: idUsuario);
             break;
           case 'Ver Ubicaciones':
             setState(() {
@@ -219,8 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 professionNames.add(profession["profesion__nombre_profesion"]);
               }
             });
-            child = VerUbicaciones(
-                idUsuario: idUsuario, professionNames: professionNames);
+            child = VerUbicaciones(idUsuario: idUsuario, professionNames: professionNames);
             break;
           default:
             child = const Text('Opción no válida');
@@ -256,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child = AgendarCita(idUsuario.toString()); //Obtencion de id para crear la cita, esto para que se consistente con mi back-end :c
             break;
           case 'Reprogramar Cita':
-            child = const Text('Reprogramación de citas');
+            child = ReagendarCitaScreen(fetchedData: fetchedData, currentidUser: idUsuario.toString());
             break;
           case 'Cancelar Cita':
             child = CancelarCitaScreen(fetchedData: fetchedData);
