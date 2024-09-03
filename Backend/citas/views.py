@@ -235,4 +235,38 @@ def cancelar_cita_y_crear_horario(request, cita_id):
         return JsonResponse({'message': 'Cita cancelada y horario disponible creado exitosamente.'})
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)    
+        return JsonResponse({'error': str(e)}, status=400)  
+
+
+### REAGENDAR CITAS ###  
+def reagendar_cita(request, cita_id):
+    try:
+        # Obtener la cita a cancelar
+        cita = get_object_or_404(Cita, id=cita_id)
+
+        # Obtener nueva fecha y hora del request
+        nueva_fecha = request.POST.get('nueva_fecha')
+        nueva_hora_inicio = request.POST.get('nueva_hora_inicio')
+        nueva_hora_fin = request.POST.get('nueva_hora_fin')
+
+        if nueva_fecha and nueva_hora_inicio and nueva_hora_fin:
+            # Eliminar la cita
+            cita.delete()
+
+            # Crear una nueva cita con la nueva fecha y hora
+            nueva_cita = Cita.objects.create(
+                cliente=cita.cliente,
+                profesional=cita.profesional,
+                ubicacion=cita.ubicacion,
+                fecha=nueva_fecha,
+                hora_inicio=nueva_hora_inicio,
+                hora_fin=nueva_hora_fin,
+                estado='Reagendada'
+            )
+
+            return JsonResponse({'message': 'Cita reagendada con éxito.'})
+        else:
+            return JsonResponse({'error': 'Datos incompletos para reagendar la cita.'}, status=400)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

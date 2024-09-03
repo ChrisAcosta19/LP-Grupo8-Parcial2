@@ -9,6 +9,7 @@ import 'Profesional/crear_horario.dart';
 import 'Cliente/ver_citas.dart';
 import 'Profesional/ver_ubicaciones.dart';
 import 'Cliente/eliminar_cita.dart';
+import 'Cliente/reagendar_citas.dart';
 
 void main() {
   runApp(const MyApp());
@@ -113,8 +114,8 @@ class _MyHomePageState extends State<MyHomePage> {
               'http://localhost:8000/cliente/$idUsuario/citas/'),
           _buildMenuItem('Agendar Cita', Icons.access_time,
               'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
-          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-          ///Code de relocalizacion
+          _buildMenuItem('Reprogramar Cita', Icons.edit, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
           _buildMenuItem('Cancelar Cita', Icons.delete, 
               'http://localhost:8000/cliente/$idUsuario/citas/'),
         ];
@@ -242,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child = AgendarCita(idUsuario.toString()); //Obtencion de id para crear la cita, esto para que se consistente con mi back-end :c
             break;
           case 'Reprogramar Cita':
-            child = const Text('Reprogramación de citas');
+            child = ReagendarCitaScreen(fetchedData: fetchedData, currentidUser: idUsuario.toString());
             break;
           case 'Cancelar Cita':
             child = CancelarCitaScreen(fetchedData: fetchedData);
