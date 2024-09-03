@@ -1,12 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'editar_profesional.dart';
-import 'crear_profesional.dart';
+import 'editar_profesional.dart'; // Asegúrate de tener esta pantalla para modificar profesionales
+import 'crear_profesional.dart'; // Asegúrate de tener esta pantalla para agregar nuevos profesionales
 
 class VerProfesionales extends StatefulWidget {
-  const VerProfesionales({Key? key}) : super(key: key);
-
   @override
   _VerProfesionalesState createState() => _VerProfesionalesState();
 }
@@ -55,15 +53,18 @@ class _VerProfesionalesState extends State<VerProfesionales> {
       );
 
       if (response.statusCode == 200) {
+        // Actualiza la lista de clientes después de eliminar
         _loadProfesionales();
-        print('Profesional eliminado exitosamente');
+        print('Cliente eliminado exitosamente');
       } else {
-        print('Error al eliminar el profesional');
+        print('Error al eliminar el cliente');
+        // Considera mostrar un mensaje de error en la UI
       }
     } catch (e) {
-      print('Excepción al eliminar profesional: $e');
+      print('Excepción al eliminar cliente: $e');
+      // Considera mostrar un mensaje de error en la UI
     }
-  }
+}
 
   void _showOptions(BuildContext context, dynamic profesional) {
     showModalBottomSheet(
@@ -80,16 +81,16 @@ class _VerProfesionalesState extends State<VerProfesionales> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditProfesionalScreen(profesional: profesional),
+                    builder: (context) => EditarProfesionalScreen(profesionalId: profesional['usuario_id']),
                   ),
-                ).then((_) => _loadProfesionales());
+                ).then((_) => _loadProfesionales()); // Recargar profesionales después de volver
               },
             ),
             ListTile(
               leading: Icon(Icons.delete),
               title: Text('Eliminar'),
               onTap: () {
-                _deleteProfesional(profesional['id']);
+                _deleteProfesional(profesional['usuario_id']);
                 Navigator.pop(context);
               },
             ),
@@ -100,10 +101,13 @@ class _VerProfesionalesState extends State<VerProfesionales> {
   }
 
   void _addProfesional() async {
+    // Abre la pantalla para agregar un nuevo profesional
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => CrearProfesionalScreen()),
     );
+
+    // Recarga la lista de profesionales después de agregar uno nuevo
     _loadProfesionales();
   }
 
@@ -126,7 +130,7 @@ class _VerProfesionalesState extends State<VerProfesionales> {
                       children: [
                         Icon(Icons.add),
                         SizedBox(width: 10),
-                        Text('Nuevo Profesional'),
+                        Text('Nuevo Cliente'),
                       ],
                     ),
                   ),
@@ -138,12 +142,21 @@ class _VerProfesionalesState extends State<VerProfesionales> {
                           itemCount: profesionales.length,
                           itemBuilder: (context, index) {
                             final profesional = profesionales[index];
-                            return ListTile(
-                              title: Text(profesional['nombre'] ?? 'Nombre no disponible'),
-                              subtitle: Text(profesional['correo_electronico'] ?? 'Correo no disponible'),
-                              onTap: () {
-                                _showOptions(context, profesional);
-                              },
+                            return Card(
+                              child: ListTile(
+                                title: Text(profesional['usuario_nombre']),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Correo: ${profesional['correo_electronico']}'),
+                                    Text('Profesión: ${profesional['nombre_profesion']}'),
+                                    Text('Dirección: ${profesional['direccion_ubicacion'] ?? 'No disponible'}'),
+                                  ],
+                                ),
+                                onTap: () {
+                                  _showOptions(context, profesional);
+                                },
+                              ),
                             );
                           },
                         ),

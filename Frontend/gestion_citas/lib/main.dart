@@ -232,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child = VerClientes(fetchedData: fetchedData);
             break;
          case 'Profesionales':
-            child = const VerProfesionales();
+            child = VerProfesionales();
             break;
           case 'Profesiones':
             child = const VerProfesiones();

@@ -1,116 +1,144 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class EditProfesionalScreen extends StatefulWidget {
-  final dynamic profesional;
+class EditarProfesionalScreen extends StatefulWidget {
+  final int profesionalId;
 
-  const EditProfesionalScreen({Key? key, required this.profesional}) : super(key: key);
+  EditarProfesionalScreen({required this.profesionalId});
 
   @override
-  _EditProfesionalScreenState createState() => _EditProfesionalScreenState();
+  _EditarProfesionalScreenState createState() => _EditarProfesionalScreenState();
 }
 
-class _EditProfesionalScreenState extends State<EditProfesionalScreen> {
+class _EditarProfesionalScreenState extends State<EditarProfesionalScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nombreController;
-  late TextEditingController _correoController;
+  final _nombreController = TextEditingController();
+  final _correoController = TextEditingController();
+  final _direccionController = TextEditingController();
+
+  List<Map<String, dynamic>> _profesiones = [];
+  int? _selectedProfesionId;
 
   @override
   void initState() {
     super.initState();
-    _nombreController = TextEditingController(text: widget.profesional['nombre']);
-    _correoController = TextEditingController(text: widget.profesional['correo_electronico']);
+    _fetchProfesiones();
+    _fetchProfesionalDetails();
   }
 
-  @override
-  void dispose() {
-    _nombreController.dispose();
-    _correoController.dispose();
-    super.dispose();
+  Future<void> _fetchProfesiones() async {
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/profesiones/lista/'));
+    if (response.statusCode == 200) {
+      setState(() {
+        _profesiones = List<Map<String, dynamic>>.from(json.decode(response.body));
+      });
+    } else {
+      print('Error al cargar profesiones');
+    }
   }
 
-  Future<void> _updateProfesional() async {
+  Future<void> _fetchProfesionalDetails() async {
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000/administrador/profesionales/${widget.profesionalId}/'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _nombreController.text = data['usuario_nombre'];
+        _correoController.text = data['correo_electronico'];
+        _direccionController.text = data['direccion_ubicacion'];
+        _selectedProfesionId = data['profesion_id'];
+      });
+    } else {
+      print('Error al cargar detalles del profesional');
+    }
+  }
+
+  Future<void> _editarProfesional() async {
     if (_formKey.currentState?.validate() ?? false) {
-      try {
-        final response = await http.put(
-          Uri.parse('http://localhost:8000/usuarios/actualizar/${widget.profesional['id']}/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, dynamic>{
-            'nombre': _nombreController.text,
-            'correo_electronico': _correoController.text,
-          }),
-        );
+      final jsonBody = jsonEncode({
+        'usuario_nombre': _nombreController.text,
+        'correo_electronico': _correoController.text,
+        'profesion_id': _selectedProfesionId,
+        'direccion_ubicacion': _direccionController.text,
+      });
 
-        if (response.statusCode == 200) {
-          Navigator.pop(context, true);
-        } else {
-          _showError('Error al actualizar el profesional');
-        }
-      } catch (e) {
-        _showError('Excepción al actualizar profesional: $e');
+      final response = await http.put(
+        Uri.parse('http://localhost:8000/administrador/profesionales/modificar/${widget.profesionalId}/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonBody,
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context);
+      } else {
+        print('Error al editar profesional');
       }
     }
   }
 
-  void _showError(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Profesional'),
+        title: Text('Editar Profesional'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
-            children: [
+            children: <Widget>[
               TextFormField(
                 controller: _nombreController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: InputDecoration(labelText: 'Nombre de Usuario'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un nombre';
+                    return 'Por favor ingresa el nombre de usuario';
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _correoController,
-                decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                decoration: InputDecoration(labelText: 'Correo Electrónico'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un correo electrónico';
+                    return 'Por favor ingresa el correo electrónico';
                   }
                   return null;
                 },
               ),
+              DropdownButtonFormField<int>(
+                value: _selectedProfesionId,
+                items: _profesiones.map((profesion) {
+                  return DropdownMenuItem<int>(
+                    value: profesion['id'],
+                    child: Text(profesion['nombre_profesion']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedProfesionId = value;
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Nombre de Profesión'),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Por favor selecciona una profesión';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _direccionController,
+                decoration: InputDecoration(labelText: 'Dirección de Ubicación'),
+              ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _updateProfesional,
-                child: const Text('Guardar'),
+                onPressed: _editarProfesional,
+                child: Text('Guardar Cambios'),
               ),
             ],
           ),

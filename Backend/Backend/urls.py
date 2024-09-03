@@ -27,7 +27,7 @@ from usuarios.views import crear_cliente, crear_profesional, obtener_id_usuario,
 from citas.views import cancelar_cita_y_crear_horario
 
 # vistas que usan los administradores
-from usuarios.views import lista_profesionales_admin
+from usuarios.views import lista_profesionales_admin, crear_profesionales_admin, modificar_profesionales_admin, detalle_profesional_admin
 from profesiones.views import actualizar_profesion_admin, eliminar_profesion
 
 
@@ -52,7 +52,6 @@ urlpatterns = [
     path('usuarios/lista/', lista_usuarios, name='lista_usuarios'),
     path('usuarios/clientes/', lista_cliente, name='lista_cliente'),
     path('usuarios/profesionales/', lista_profesionales, name='lista_profesionales'),
-    path('administrador/profesionales/', lista_profesionales_admin, name='lista_profesionales_admin'),
     path('usuarios/administradores/', lista_administradores, name='lista_administradores'),
     path('usuarios/actualizar/<int:usuario_id>/', actualizar_usuario, name='actualizar_usuario'),
     path('usuarios/eliminar/<int:usuario_id>/', eliminar_usuario, name='eliminar_usuario'),
@@ -78,4 +77,8 @@ urlpatterns = [
     path('administrador/crear_profesion/', crear_profesion, name='crear_profesion'),
     path('administrador/actualizar_profesion_admin/<int:id>/', actualizar_profesion_admin, name='actualizar_profesion_admin'),
     path('administrador/eliminar_profesion/<int:id>/', eliminar_profesion, name='eliminar_profesion'),
+    path('administrador/profesionales/<int:id>/', detalle_profesional_admin, name='detalle_profesional'),
+    path('administrador/profesionales/', lista_profesionales_admin, name='lista_profesionales_admin'),
+    path('administrador/profesionales/crear/', crear_profesionales_admin, name='crear_profesional'),
+    path('administrador/profesionales/modificar/<int:id>/', modificar_profesionales_admin, name='modificar_profesionales_admin'),
 ]

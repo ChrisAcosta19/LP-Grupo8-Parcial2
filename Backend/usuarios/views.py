@@ -1,20 +1,24 @@
 import json
+import MySQLdb
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, JsonResponse
-from .models import Usuario
-from .forms import UsuarioProfesionalForm, UsuarioForm
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from profesiones.models import Profesion
 from profesionales.models import Profesional
+from ubicaciones.models import Ubicacion
+from .models import Usuario
+from .forms import UsuarioProfesionalForm, UsuarioForm
 from rest_framework.response import Response
 from rest_framework import status
-from ubicaciones.models import Ubicacion
+from django.db import connection, transaction
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
-    # Convertir los datos a un formato que se pueda usar en JSON
     data = list(usuarios.values('id', 'nombre', 'correo_electronico', 'rol'))
     return JsonResponse(data, safe=False)
 
@@ -22,16 +26,6 @@ def lista_usuarios(request):
 def lista_cliente(request):
     # Filtrar usuarios con rol "Cliente"
     clientes = Usuario.objects.filter(rol='Cliente')
-
-    # Convertir los datos a un formato que se pueda usar en JSON
-    data = list(clientes.values('id', 'nombre', 'correo_electronico', 'rol'))
-
-    return JsonResponse(data, safe=False)
-
-
-def lista_profesionales_admin(request):
-    # Filtrar usuarios con rol "Profesional"
-    clientes = Usuario.objects.filter(rol='Profesional')
 
     # Convertir los datos a un formato que se pueda usar en JSON
     data = list(clientes.values('id', 'nombre', 'correo_electronico', 'rol'))
@@ -254,3 +248,157 @@ def eliminar_profesional(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
     except Profesional.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+def lista_profesionales_admin(request):
+    with connection.cursor() as cursor:
+        cursor.execute('''
+            SELECT u.id AS usuario_id, u.nombre AS usuario_nombre, u.correo_electronico, 
+                       p.nombre_profesion, ub.direccion AS direccion_ubicacion 
+                       FROM usuarios_usuario u 
+                       JOIN profesionales_profesional pp ON u.id = pp.usuario_id 
+                       JOIN profesiones_profesion p ON pp.profesion_id = p.id 
+                       LEFT JOIN ubicaciones_ubicacion ub ON pp.id = ub.profesional_id 
+                       WHERE u.rol = 'Profesional';
+                       ''')
+        rows = cursor.fetchall()
+
+    profesionales = [
+        {
+            'usuario_id': row[0],
+            'usuario_nombre': row[1],
+            'correo_electronico': row[2],
+            'nombre_profesion': row[3],
+            'direccion_ubicacion': row[4]
+        }
+        for row in rows
+    ]
+
+    return JsonResponse(profesionales, safe=False)
+
+
+def detalle_profesional_admin(request, id):
+    with connection.cursor() as cursor:
+        cursor.execute('''
+            SELECT u.id AS usuario_id, u.nombre AS usuario_nombre, u.correo_electronico, 
+                   p.nombre_profesion, ub.direccion AS direccion_ubicacion 
+            FROM usuarios_usuario u 
+            JOIN profesionales_profesional pp ON u.id = pp.usuario_id 
+            JOIN profesiones_profesion p ON pp.profesion_id = p.id 
+            LEFT JOIN ubicaciones_ubicacion ub ON pp.id = ub.profesional_id 
+            WHERE u.rol = 'Profesional' AND u.id = %s;
+            ''', [id])
+        row = cursor.fetchone()
+
+    if row:
+        profesional = {
+            'usuario_id': row[0],
+            'usuario_nombre': row[1],
+            'correo_electronico': row[2],
+            'nombre_profesion': row[3],
+            'direccion_ubicacion': row[4]
+        }
+        return JsonResponse(profesional)
+    else:
+        return JsonResponse({'error': 'Profesional no encontrado'}, status=404)
+
+
+logger = logging.getLogger(__name__)
+
+
+@csrf_exempt
+def crear_profesionales_admin(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Extrae los datos del JSON recibido
+            usuario_nombre = data.get('usuario_nombre')
+            correo_electronico = data.get('correo_electronico')
+            contrasena = data.get('contrasena')
+            profesion_id = data.get('profesion_id')
+            direccion_ubicacion = data.get('direccion_ubicacion')
+
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Inserta el usuario en la tabla usuarios_usuario
+                    cursor.execute('''
+                        INSERT INTO usuarios_usuario (nombre, correo_electronico, contrasena, rol)
+                        VALUES (%s, %s, %s, 'Profesional')
+                    ''', [usuario_nombre, correo_electronico, contrasena])
+
+                    # Obtén el ID del último usuario insertado
+                    cursor.execute('SELECT LAST_INSERT_ID()')
+                    usuario_id = cursor.fetchone()[0]
+
+                    # Inserta el profesional en la tabla profesionales_profesional
+                    cursor.execute('''
+                        INSERT INTO profesionales_profesional (profesion_id, usuario_id)
+                        VALUES (%s, %s)
+                    ''', [profesion_id, usuario_id])
+
+                    # Si se proporciona una dirección, inserta en la tabla ubicaciones_ubicacion
+                    if direccion_ubicacion:
+                        cursor.execute('SELECT LAST_INSERT_ID()')
+                        profesional_id = cursor.fetchone()[0]
+
+                        cursor.execute('''
+                            INSERT INTO ubicaciones_ubicacion (direccion, profesional_id)
+                            VALUES (%s, %s)
+                        ''', [direccion_ubicacion, profesional_id])
+
+            # Devuelve una respuesta JSON indicando éxito
+            return JsonResponse({'mensaje': 'Profesional creado exitosamente'}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al procesar JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+@csrf_exempt
+def modificar_profesionales_admin(request, id):
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            usuario_nombre = data.get('usuario_nombre')
+            correo_electronico = data.get('correo_electronico')
+            profesion_id = data.get('profesion_id')
+            direccion_ubicacion = data.get('direccion_ubicacion')
+
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    # Actualiza los datos del usuario en la tabla usuarios_usuario
+                    cursor.execute('''
+                        UPDATE usuarios_usuario
+                        SET nombre = %s, correo_electronico = %s
+                        WHERE id = %s
+                    ''', [usuario_nombre, correo_electronico, id])
+
+                    # Actualiza la profesión del profesional en la tabla profesionales_profesional
+                    cursor.execute('''
+                        UPDATE profesionales_profesional
+                        SET profesion_id = %s
+                        WHERE usuario_id = %s
+                    ''', [profesion_id, id])
+
+                    # Actualiza la dirección del profesional en la tabla ubicaciones_ubicacion
+                    cursor.execute('''
+                        UPDATE ubicaciones_ubicacion
+                        SET direccion = %s
+                        WHERE profesional_id = (
+                            SELECT id FROM profesionales_profesional WHERE usuario_id = %s
+                        )
+                    ''', [direccion_ubicacion, id])
+
+            # Devuelve una respuesta JSON indicando éxito
+            return JsonResponse({'mensaje': 'Profesional actualizado exitosamente'}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Error al procesar JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
