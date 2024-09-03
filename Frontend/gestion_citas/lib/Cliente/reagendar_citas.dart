@@ -1,5 +1,6 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'eliminar_cita.dart';
 import 'agendar_citas.dart';
 
@@ -7,7 +8,7 @@ class ReagendarCitaScreen extends StatelessWidget {
   final List<dynamic> fetchedData;
   final String currentidUser;
 
-  const ReagendarCitaScreen({Key? key, required this.fetchedData, required this.currentidUser}) : super(key: key);
+  const ReagendarCitaScreen({super.key, required this.fetchedData, required this.currentidUser});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class ReagendarCitaScreen extends StatelessWidget {
               );
             }
           },
-          child: Text('Pestaña reagenddar Cita'),
+          child: const Text('Pestaña reagenddar Cita'),
         ),
       ),
     );

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',  # Aplicación para habilitar CORS
+    'rest_framework', # Aplicación para habilitar REST Framework
     # Aplicaciones del proyecto
     'usuarios',
     'profesiones',
@@ -115,7 +116,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gestion_citas',
         'USER': 'root',
-        'PASSWORD': 'Cuborubik3/3',
+        'PASSWORD': 'root',
         'HOST':'localhost',
         'PORT':'3306',
     }

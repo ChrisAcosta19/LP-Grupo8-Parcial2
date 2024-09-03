@@ -4,8 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from usuarios.models import Usuario
 from .models import Ubicacion
+from .forms import UbicacionForm
 import json
-
 
 @csrf_exempt
 def crear_ubicacion_sin_form(request, profesional_id):
@@ -18,7 +18,6 @@ def crear_ubicacion_sin_form(request, profesional_id):
     else:
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
 def crear_ubicacion(request):
     if request.method == 'POST':
         form = UbicacionForm(request.POST)
@@ -29,8 +28,6 @@ def crear_ubicacion(request):
         form = UbicacionForm()
 
     return render(request, 'ubicaciones/crear_ubicacion.html', {'form': form})
-
-
 
 @csrf_exempt  # Solo para pruebas, no recomendado en producción
 @require_http_methods(["PUT"])
@@ -66,7 +63,6 @@ def actualizar_ubicacion(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
 def eliminar_ubicacion(request, ubicacion_id):
     ubicacion = get_object_or_404(Ubicacion, id=ubicacion_id)
     if request.method == 'POST':
@@ -75,7 +71,6 @@ def eliminar_ubicacion(request, ubicacion_id):
 
     # Si quieres mostrar un mensaje de confirmación antes de eliminar
     return render(request, 'ubicaciones/eliminar_ubicacion.html', {'ubicacion': ubicacion})
-
 
 def lista_ubicaciones(request):
     # Obtener todas las ubicaciones de la base de datos
@@ -87,7 +82,6 @@ def lista_ubicaciones(request):
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
 
-
 def listar_ubicaciones_id_usuario(request, usuario_id):
     # Obtener todas las ubicaciones de un profesional específico
     ubicaciones = Ubicacion.objects.filter(profesional__usuario_id=usuario_id)
@@ -96,9 +90,6 @@ def listar_ubicaciones_id_usuario(request, usuario_id):
     data = list(ubicaciones.values('id', 'direccion', 'profesional__profesion__nombre_profesion'))
     
     # Devolver los datos como una respuesta JSON
-<<<<<<< HEAD
-    return JsonResponse(data, safe=False)
-=======
     return JsonResponse(data, safe=False)
 
 def listar_ubicaciones_id_profesional(request, profesional_id):
@@ -110,4 +101,3 @@ def listar_ubicaciones_id_profesional(request, profesional_id):
     
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
->>>>>>> 02481606778e42bc3d61ed3d015145a4132280a5
