@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',  # Aplicación para habilitar CORS
-
     # Aplicaciones del proyecto
     'usuarios',
     'profesiones',
@@ -62,6 +61,26 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",  # Dominio de la aplicación Flutter
 ]
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+]
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'accept',
+    'authorization',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 ROOT_URLCONF = 'Backend.urls'
 
@@ -95,7 +114,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gestion_citas',
         'USER': 'root',
-        'PASSWORD': 'Cuborubik3/3',
+        'PASSWORD': 'root',
         'HOST':'localhost',
         'PORT':'3306',
     }

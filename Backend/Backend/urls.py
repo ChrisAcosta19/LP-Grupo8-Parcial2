@@ -18,8 +18,6 @@ from django.contrib import admin
 from django.urls import path
 from horarios.views import horarios_por_profesional, crear_horario_disponible
 from citas.views import citas_por_profesional
-from usuarios.views import crear_usuario, lista_usuarios, lista_cliente, lista_administradores, actualizar_usuario, eliminar_usuario
-from profesionales.views import asignar_profesion
 from profesionales.views import consultar_profesiones, lista_profesionales
 from profesiones.views import lista_profesiones, crear_profesion
 from citas.views import citas_por_cliente
@@ -30,7 +28,8 @@ from citas.views import obtener_ubicaciones_y_horarios
 from citas.views import crear_cita_admin
 from citas.views import lista_citas_admin
 from usuarios.views import usuario_por_id
-from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones
+from ubicaciones.views import crear_ubicacion, eliminar_ubicacion, lista_ubicaciones, actualizar_ubicacion
+from usuarios.views import crear_usuario, crear_cliente, crear_profesional, lista_usuarios, lista_cliente, lista_administradores, actualizar_usuario, eliminar_usuario, asignar_profesion, obtener_id_usuario, actualizar_profesion, eliminar_profesion, eliminar_ubicacion2, eliminar_profesional
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -49,15 +48,24 @@ urlpatterns = [
     path('usuarios/administradores/', lista_administradores, name='lista_administradores'),
     path('usuarios/actualizar/<int:usuario_id>/', actualizar_usuario, name='actualizar_usuario'),
     path('usuarios/eliminar/<int:usuario_id>/', eliminar_usuario, name='eliminar_usuario'),
+    path('usuarios/crear_cliente/', crear_cliente, name='crear_cliente'),
+    path('usuarios/crear_profesional/', crear_profesional, name='crear_profesional'),
+    path('usuarios/asignar_profesion/', asignar_profesion, name='asignar_profesion'),
+    path('usuarios/eliminar_profesion/<int:id>/', eliminar_profesion, name='eliminar_profesion'),
+    path('usuarios/actualizar_profesion/', actualizar_profesion, name='asignar_profesion'),
+    path('usuarios/obtener_id/', obtener_id_usuario, name='obtener_id_usuario'),
     path('profesiones/lista/', lista_profesiones, name='lista_profesiones'),
     path('profesiones/crear/', crear_profesion, name='crear_profesion'),
-    path('profesionales/asignar-profesion/', asignar_profesion, name='asignar_profesion'),
     path('usuarios/clientes/buscar-profesionales/', buscar_profesionales, name='buscar_profesionales'),
-    path('ubicaciones/crear/', crear_ubicacion, name='crear_ubicacion'),
+    path('ubicaciones/crear/', crear_ubicacion, name='crear_ubicacion'), 
+    path('ubicaciones/actualizar_ubicacion/', actualizar_ubicacion, name='actualizar_ubicacion'),
     path('ubicaciones/eliminar/<int:ubicacion_id>/', eliminar_ubicacion, name='eliminar_ubicacion'),
-    path('ubicaciones/lista', lista_ubicaciones, name='lista_ubicaciones'),  # Lista de ubicaciones
+    path('ubicaciones/lista/', lista_ubicaciones, name='lista_ubicaciones'),
     path('profesionales/profesion/<int:profesion_id>/', obtener_profesionales_por_profesion, name='obtener_profesionales_por_profesion'),
     path('ubicaciones_horarios/<int:profesional_id>/', obtener_ubicaciones_y_horarios, name='obtener_ubicaciones_y_horarios'),
     path('administrador/crear_cita/', crear_cita_admin, name='crear_cita_admin'),
     path('administrador/lista_citas/', lista_citas_admin, name='lista_citas_admin'),
+    path('usuarios/eliminar2/<int:id>/', eliminar_profesional, name='eliminar_profesional'),
+    path('usuarios/eliminar_profesion2/<int:id>/', eliminar_profesion, name='eliminar_profesion'),
+    path('ubicaciones/eliminar_ubicacion2/<int:ubicacion_id>/', eliminar_ubicacion2, name='eliminar_ubicacion2'),
 ]

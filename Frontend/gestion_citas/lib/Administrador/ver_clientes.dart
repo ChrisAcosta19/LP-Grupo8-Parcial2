@@ -1,89 +1,102 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'editar_cliente.dart'; // Asegúrate de tener esta pantalla para modificar clientes
+import 'crear_cliente.dart'; // Asegúrate de tener esta pantalla para agregar clientes
 
 class VerClientes extends StatefulWidget {
-  final List<dynamic> fetchedData;
-  const VerClientes({super.key, required this.fetchedData});
+  final dynamic fetchedData; // Añadir esta línea
+  const VerClientes({super.key, this.fetchedData}); // Modificar el constructor
 
   @override
   _VerClientesState createState() => _VerClientesState();
 }
 
 class _VerClientesState extends State<VerClientes> {
-  late List<dynamic> _clientes;
-  String _searchQuery = '';
+  List<dynamic> clientes = []; // Inicialmente vacío
+  bool _isLoading = true; // Agregar estado de carga
 
   @override
   void initState() {
     super.initState();
-    _clientes = widget.fetchedData;
+    _loadClientes(); // Cargar clientes al inicio
   }
 
-  void _updateSearchQuery(String query) {
-    setState(() {
-      _searchQuery = query;
-      _clientes = widget.fetchedData.where((cliente) {
-        final nombre = cliente["nombre"]?.toLowerCase() ?? '';
-        final correo = cliente["correo_electronico"]?.toLowerCase() ?? '';
-        return nombre.contains(_searchQuery.toLowerCase()) || correo.contains(_searchQuery.toLowerCase());
-      }).toList();
-    });
+  Future<void> _loadClientes() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8000/usuarios/clientes/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            clientes = jsonDecode(response.body);
+            _isLoading = false; // Actualiza el estado de carga
+          });
+        }
+      } else {
+        print('Error al cargar clientes');
+        // Considera mostrar un mensaje de error en la UI
+      }
+    } catch (e) {
+      print('Excepción al cargar clientes: $e');
+      // Considera mostrar un mensaje de error en la UI
+    }
   }
 
-  void _showAddClienteDialog() {
-    showDialog(
+  Future<void> _deleteCliente(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://localhost:8000/usuarios/eliminar/$id/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Actualiza la lista de clientes después de eliminar
+        _loadClientes();
+        print('Cliente eliminado exitosamente');
+      } else {
+        print('Error al eliminar el cliente');
+        // Considera mostrar un mensaje de error en la UI
+      }
+    } catch (e) {
+      print('Excepción al eliminar cliente: $e');
+      // Considera mostrar un mensaje de error en la UI
+    }
+  }
+
+  void _showOptions(BuildContext context, dynamic cliente) {
+    showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController nombreController = TextEditingController();
-        final TextEditingController correoController = TextEditingController();
-        final TextEditingController passwordController = TextEditingController();
-
-        return AlertDialog(
-          title: const Text('Agregar Nuevo Cliente'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: nombreController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
-              ),
-              TextField(
-                controller: correoController,
-                decoration: const InputDecoration(labelText: 'Correo Electrónico'),
-              ),
-              TextField(
-                controller: passwordController,
-                obscureText: true, // Oculta el texto de la contraseña
-                decoration: const InputDecoration(labelText: 'Contraseña'),
-              ),
-              // Agrega más campos según sea necesario
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('CANCELAR'),
-              onPressed: () {
-                Navigator.of(context).pop();
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('Modificar'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditClienteScreen(cliente: cliente),
+                  ),
+                ).then((_) => _loadClientes()); // Recargar clientes después de volver
               },
             ),
-            TextButton(
-              child: const Text('AGREGAR'),
-              onPressed: () {
-                final nombre = nombreController.text;
-                final correo = correoController.text;
-                final password = passwordController.text;
-
-                // Aquí puedes añadir la lógica para enviar los datos al servidor
-                // Por ahora, solo actualizamos el estado local
-                setState(() {
-                  _clientes.add({
-                    "nombre": nombre,
-                    "correo_electronico": correo,
-                    "contraseña": password, // Agregamos la contraseña aquí
-                    "rol": "Cliente",
-                  });
-                });
-
-                Navigator.of(context).pop();
+            ListTile(
+              leading: Icon(Icons.delete),
+              title: Text('Eliminar'),
+              onTap: () {
+                _deleteCliente(cliente['id']);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -92,85 +105,60 @@ class _VerClientesState extends State<VerClientes> {
     );
   }
 
+  void _addCliente() async {
+    // Abre la pantalla para agregar un nuevo cliente
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CrearClienteScreen()),
+    );
+
+    // Recarga la lista de clientes después de agregar uno nuevo
+    _loadClientes();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'CLIENTE',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar...',
-                    border: OutlineInputBorder(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Lista de Clientes'),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: _addCliente,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add),
+                        SizedBox(width: 10),
+                        Text('Nuevo Cliente'),
+                      ],
+                    ),
                   ),
-                  onChanged: _updateSearchQuery,
                 ),
-              ),
-              const SizedBox(width: 8.0),
-              ElevatedButton(
-                onPressed: _showAddClienteDialog,
-                child: const Row(
-                  children: <Widget>[
-                    Icon(Icons.add),
-                    SizedBox(width: 4.0),
-                    Text('NUEVO'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: _clientes.isEmpty
-              ? const Center(child: Text('No hay clientes'))
-              : ListView.builder(
-                  itemCount: _clientes.length,
-                  itemBuilder: (context, index) {
-                    final cliente = _clientes[index];
-                    final nombre = cliente["nombre"] ?? "Nombre no disponible";
-                    final correoElectronico = cliente["correo_electronico"] ?? "Correo electrónico no disponible";
-                    final rol = cliente["rol"] ?? "Rol no disponible";
-
-                    return Card(
-                      margin: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text(nombre),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                const Icon(Icons.email),
-                                const SizedBox(width: 8),
-                                Text(correoElectronico),
-                              ],
-                            ),
-                            Row(
-                              children: <Widget>[
-                                const Icon(Icons.card_membership),
-                                const SizedBox(width: 8),
-                                Text(rol),
-                              ],
-                            ),
-                          ],
+                Expanded(
+                  child: clientes.isEmpty
+                      ? const Center(child: Text('No hay clientes disponibles'))
+                      : ListView.builder(
+                          itemCount: clientes.length,
+                          itemBuilder: (context, index) {
+                            final cliente = clientes[index];
+                            return ListTile(
+                              title: Text(cliente['nombre'] ?? 'Nombre no disponible'),
+                              subtitle: Text(cliente['correo_electronico'] ?? 'Correo no disponible'),
+                              onTap: () {
+                                _showOptions(context, cliente);
+                              },
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  },
                 ),
-        ),
-      ],
+              ],
+            ),
     );
   }
 }

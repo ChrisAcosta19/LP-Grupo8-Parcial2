@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .forms import ProfesionalForm
 from .models import Profesional
+from ubicaciones.models import Ubicacion
 
 
 def asignar_profesion(request): 
@@ -27,17 +28,22 @@ def lista_profesionales(request):
     # Obtener todos los profesionales y sus datos relacionados
     profesionales = Profesional.objects.select_related('usuario', 'profesion').all()
 
-    # Convertir los datos a un formato que se pueda usar en JSON
-    data = [
-        {
+    # Crear una lista para almacenar los datos
+    data = []
+
+    for profesional in profesionales:
+        # Obtener la dirección asociada al usuario
+        ubicacion = Ubicacion.objects.filter(usuario=profesional.usuario).first()  # Suponemos que puede haber una sola dirección por usuario
+        
+        # Añadir la información a la lista de datos
+        data.append({
             'id': profesional.usuario.id,
             'nombre': profesional.usuario.nombre,
             'correo_electronico': profesional.usuario.correo_electronico,
             'rol': profesional.usuario.rol,
-            'profesion': profesional.profesion.nombre_profesion
-        }
-        for profesional in profesionales
-    ]
+            'profesion': profesional.profesion.nombre_profesion,
+            'direccion': ubicacion.direccion if ubicacion else 'No disponible'  # Añadir la dirección
+        })
 
     return JsonResponse(data, safe=False)
 

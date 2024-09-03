@@ -4,6 +4,11 @@ import 'dart:convert';
 import 'Profesional/ver_citas.dart';
 import 'Profesional/ver_horarios.dart';
 import 'Administrador/ver_clientes.dart';
+import 'Administrador/ver_profesionales.dart';
+import 'Administrador/ver_profesiones.dart';
+import 'Administrador/ver_citasAdmin.dart';
+import 'Administrador/ver_perfil.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -52,26 +57,50 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String> professionNames = [];
 
   // Método para obtener datos desde el servidor
-  Future<void> fetchData(String url) async {
+Future<void> fetchData(String url) async {
+  try {
     final response = await http.get(Uri.parse(url));
-    fetchedData = List.empty(); // Limpiar los datos obtenidos
-    if (response.statusCode == 200 &&
-        !response.body.contains('<!DOCTYPE html>')) {
-      setState(() {
-        fetchedData = json.decode(response.body);
-      });
-    }
-  }
+    dynamic decoded = json.decode(response.body);
 
-  Future<void> fetchUserData(String url) async {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200 &&
-        !response.body.contains('<!DOCTYPE html>')) {
-      setState(() {
-        fetchedUserData = json.decode(response.body);
-      });
+    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
+      if (decoded is List) {
+        // Si se recibe una lista de objetos
+        setState(() {
+          fetchedData = decoded;
+        });
+      } else if (decoded is Map<String, dynamic>) {
+        // Si se recibe un solo objeto, ponlo en una lista
+        setState(() {
+          fetchedData = [decoded]; // Convierte a lista
+        });
+      } else {
+        print('Formato de JSON no reconocido.');
+      }
+    } else {
+      print('Error en la respuesta del servidor: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error al obtener los datos: $e');
   }
+}
+
+
+Future<void> fetchUserData(String url) async {
+  try {
+    final response = await http.get(Uri.parse(url));
+    dynamic decoded = json.decode(response.body);
+
+    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
+      setState(() {
+        fetchedUserData = decoded;
+      });
+    } else {
+      print('Error en la respuesta del servidor: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error al obtener los datos del usuario: $e');
+  }
+}
 
   String formatTimeOfDay(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0'); // Asegura dos dígitos
@@ -104,10 +133,15 @@ class _MyHomePageState extends State<MyHomePage> {
       case 'Administrador':
         options = [
           _buildMenuItem('Clientes', Icons.people,
-              'http://localhost:8000/usuarios/clientes/'),
-          _buildMenuItem('Profesionales', Icons.person, ''),
-          _buildMenuItem('Citas', Icons.calendar_today,''),
-          _buildMenuItem('Perfil', Icons.person_outline, ''),
+          'http://localhost:8000/usuarios/clientes/'),
+          _buildMenuItem('Profesionales', Icons.school,
+          'http://localhost:8000/usuarios/profesionales/'),
+          _buildMenuItem('Profesiones',Icons.business_center,
+          'http://localhost:8000/profesiones/lista/'),
+          _buildMenuItem('Citas', Icons.calendar_today,
+          'http://localhost:8000/administrador/lista_citas/'),
+          _buildMenuItem('Perfil', Icons.person_outline, 
+          'http://localhost:8000/usuarios/$idUsuario/'),
         ];
         break;
       case 'Cliente':
@@ -307,14 +341,17 @@ class _MyHomePageState extends State<MyHomePage> {
           case 'Clientes':
             child = VerClientes(fetchedData: fetchedData);
             break;
-          case 'Profesionales':
-            child = const Text('Todas las Profesionales (por implementar)');
+         case 'Profesionales':
+            child = const VerProfesionales();
+            break;
+          case 'Profesiones':
+            child = VerProfesiones(fetchedData);
             break;
           case 'Citas':
-            child = const Text('Todas las Citas (por implementar)');
+            child = VerCitasAdmin(fetchedData);
             break;
           case 'Perfil':
-            child = const Text('Perfil del Administrador (por implementar)');
+            child = VerPerfil(fetchedUserData);
             break;
           default:
             child = const Text('Opción no válida');
