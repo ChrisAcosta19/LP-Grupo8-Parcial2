@@ -124,8 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
         options = [
           _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today,
               'http://localhost:8000/cliente/$idUsuario/citas/'),
-          _buildMenuItem('Agendar Cita', Icons.access_time,
-              'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
+          _buildMenuItem('Agendar Cita', Icons.access_time, ''),
           _buildMenuItem('Reprogramar Cita', Icons.edit, 
               'http://localhost:8000/cliente/$idUsuario/citas/'),
           _buildMenuItem('Cancelar Cita', Icons.delete, 
@@ -282,7 +281,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () async {
                       setState(() {
-                        idUsuario = 2 ;
+                        idUsuario = 1;
                         rolUsuario = 'Profesional';
                         opcionSeleccionada = 'Ver Citas';
                       });
@@ -297,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ElevatedButton(
                     onPressed: () async {
                       setState(() {
-                        idUsuario = 1;
+                        idUsuario = 2;
                         rolUsuario = 'Cliente';
                         opcionSeleccionada = 'Ver Citas Agendadas';  
                       });
