@@ -10,6 +10,7 @@ import 'Profesional/reprogramar_cita.dart';
 import 'Profesional/cancelar_cita.dart';
 import 'Administrador/ver_clientes.dart';
 import 'Cliente/ver_citas.dart';
+import 'Cliente/eliminar_cita.dart';
 
 void main() {
   runApp(const MyApp());
@@ -114,11 +115,9 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildMenuItem('Agendar Cita', Icons.access_time,
               'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
-
           ///Code de relocalizacion
-          _buildMenuItem('Cancelar Cita', Icons.delete, ''),
-
-          ///Code de relocalizacion
+          _buildMenuItem('Cancelar Cita', Icons.delete, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
         ];
         break;
       default:
@@ -240,13 +239,13 @@ class _MyHomePageState extends State<MyHomePage> {
             child = verCitasClientes(fetchedData);
             break;
           case 'Agendar Cita':
-            child = const AgendarCita(); // Asegúrate de inicializar el widget
+            child = AgendarCita(idUsuario.toString()); //Obtencion de id para crear la cita, esto para que se consistente con mi back-end :c
             break;
           case 'Reprogramar Cita':
             child = const Text('Reprogramación de citas');
             break;
           case 'Cancelar Cita':
-            child = const Text('Cancelación de citas');
+            child = CancelarCitaScreen(fetchedData: fetchedData);
             break;
           default:
             child = const Text('Opción no válida');

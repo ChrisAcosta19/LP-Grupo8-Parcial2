@@ -35,6 +35,13 @@ Widget verCitasClientes(fetchedData){
                         Text('${cita["hora_inicio"]} - ${cita["hora_fin"]}'),
                       ],
                     ),
+                    Row(
+                      children: <Widget>[
+                        const Icon(Icons.date_range),
+                        const SizedBox(width: 8),
+                        Text('${cita["fecha"]}'),
+                      ],
+                    ),
                   ],
                 ), 
               ),  

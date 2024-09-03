@@ -78,15 +78,42 @@ def citas_por_cliente(request, usuario_id):
                              'profesional__profesion__nombre_profesion', 'estado'))
     return JsonResponse(data, safe=False)
 
+#### CREA CITA PARA CLIENTES ####
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def crear_cita_para_cliente(request, usuario_id):
     if request.method == 'POST':
+        print(request.POST)  #haber que llega :c (NO OLVIDAR ELIMINAR Peter)
+
         form = CrearCitaParaCLienteForm(request.POST)
         if form.is_valid():
+            print("entró")
             cita = form.save(commit=False)
             cita.usuario_id = usuario_id
+            cita.cliente_id = request.POST.get('cliente')  # Esto asigna cliente dinámico
+
+            # Filtro horarios disponibles por profesional
+            horarios_disponibles = HorarioDisponible.objects.filter(
+                profesional=cita.profesional,
+                fecha=cita.fecha,
+                hora_inicio=cita.hora_inicio
+            )
+            print(cita.profesional),
+            print(cita.fecha),
+            print(cita.hora_inicio),
+            print(horarios_disponibles) #Estará filtrando?
+            
+            # Si se crea cita, eliminarlo horario
+            if horarios_disponibles.exists():
+                horarios_disponibles.delete()
+            else:
+                print("XD NO SE ELIMINÓ")
+
             cita.save()
             return redirect('citas_por_cliente', usuario_id=usuario_id)
+        print("Form no Válido")
+
     else:
         form = CrearCitaParaCLienteForm()
 
@@ -230,3 +257,28 @@ def lista_citas_admin(request):
 
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
+
+### ELIMINAR CITAS ###
+from django.shortcuts import get_object_or_404, redirect
+
+@csrf_exempt
+def cancelar_cita_y_crear_horario(request, cita_id):
+    try:
+        # Obtener la cita a cancelar
+        cita = get_object_or_404(Cita, id=cita_id)
+
+        # Eliminar la cita
+        cita.delete()
+
+        # Crear un nuevo horario disponible
+        HorarioDisponible.objects.create(
+            profesional=cita.profesional,
+            fecha=cita.fecha,
+            hora_inicio=cita.hora_inicio,
+            hora_fin=cita.hora_fin
+        )
+
+        return JsonResponse({'message': 'Cita cancelada y horario disponible creado exitosamente.'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)    
