@@ -7,7 +7,6 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from profesiones.models import Profesion
 from profesionales.models import Profesional
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from ubicaciones.models import Ubicacion
@@ -23,6 +22,16 @@ def lista_usuarios(request):
 def lista_cliente(request):
     # Filtrar usuarios con rol "Cliente"
     clientes = Usuario.objects.filter(rol='Cliente')
+
+    # Convertir los datos a un formato que se pueda usar en JSON
+    data = list(clientes.values('id', 'nombre', 'correo_electronico', 'rol'))
+
+    return JsonResponse(data, safe=False)
+
+
+def lista_profesionales_admin(request):
+    # Filtrar usuarios con rol "Profesional"
+    clientes = Usuario.objects.filter(rol='Profesional')
 
     # Convertir los datos a un formato que se pueda usar en JSON
     data = list(clientes.values('id', 'nombre', 'correo_electronico', 'rol'))
@@ -81,8 +90,6 @@ def actualizar_usuario(request, usuario_id):
         usuario.save()
         return JsonResponse({'status': 'Usuario actualizado correctamente'})
     return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
 
 
 @csrf_exempt  # Solo para pruebas, no recomendado en producción
@@ -230,6 +237,7 @@ def eliminar_ubicacion2(request, ubicacion_id):
         return HttpResponse(status=204)
     except Ubicacion.DoesNotExist:
         return HttpResponse(status=404)
+
 
 @require_http_methods(["DELETE"])
 def eliminar_profesional(request, id):

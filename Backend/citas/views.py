@@ -4,6 +4,7 @@ from .models import Cita, Profesional
 from ubicaciones.models import Ubicacion
 from horarios.models import HorarioDisponible
 from .forms import BuscarProfesionalForm
+from .forms import BuscarHorariosPorProfesional
 
 from .forms import CrearCitaParaCLienteForm
 
@@ -31,15 +32,42 @@ def citas_por_cliente(request, usuario_id):
                              'profesional__profesion__nombre_profesion', 'estado'))
     return JsonResponse(data, safe=False)
 
+#### CREA CITA PARA CLIENTES ####
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def crear_cita_para_cliente(request, usuario_id):
     if request.method == 'POST':
+        print(request.POST)  #haber que llega :c (NO OLVIDAR ELIMINAR Peter)
+
         form = CrearCitaParaCLienteForm(request.POST)
         if form.is_valid():
+            print("entró")
             cita = form.save(commit=False)
             cita.usuario_id = usuario_id
+            cita.cliente_id = request.POST.get('cliente')  # Esto asigna cliente dinámico
+
+            # Filtro horarios disponibles por profesional
+            horarios_disponibles = HorarioDisponible.objects.filter(
+                profesional=cita.profesional,
+                fecha=cita.fecha,
+                hora_inicio=cita.hora_inicio
+            )
+            print(cita.profesional),
+            print(cita.fecha),
+            print(cita.hora_inicio),
+            print(horarios_disponibles) #Estará filtrando?
+            
+            # Si se crea cita, eliminarlo horario
+            if horarios_disponibles.exists():
+                horarios_disponibles.delete()
+            else:
+                print("XD NO SE ELIMINÓ")
+
             cita.save()
             return redirect('citas_por_cliente', usuario_id=usuario_id)
+        print("Form no Válido")
+
     else:
         form = CrearCitaParaCLienteForm()
 
@@ -61,17 +89,50 @@ def buscar_profesionales(request):
         #if disponible is not None:
         #    profesionales = profesionales.filter(disponible=disponible)
 
-    return render(request, 'citas/buscar_profesionales.html', {
+    return render(request, 'citas/buscar_horarios.html', {
         'form': form,
         'profesionales': profesionales
     })
-
 
 def obtener_profesionales_por_profesion(request, profesion_id):
     profesionales = Profesional.objects.filter(profesion_id=profesion_id).select_related('usuario')
     data = list(profesionales.values('id', 'usuario__nombre'))
     return JsonResponse(data, safe=False)
 
+# BUSQUEDA HORARIOS PARA CITAS
+def horarios_por_profesional(request, profesional_id):
+    horarios = HorarioDisponible.objects.filter(profesional_id=profesional_id)
+    data = list(horarios.values('id', 'fecha', 'hora_inicio', 'hora_fin', 'profesional__profesion__nombre_profesion'))
+    return JsonResponse(data, safe=False)
+
+
+def buscar_horarios_por_profesional(request):
+    form = BuscarHorariosPorProfesional(request.GET or None)
+    profesionales = Profesional.objects.all()
+
+    if form.is_valid():
+        profesion = form.cleaned_data.get('profesion')
+        profesional = form.cleaned_data.get('profesional')
+
+        if profesion:
+            profesionales = profesionales.filter(profesion=profesion)
+        
+        if profesional:
+            profesionales = profesionales.filter(id=profesional.id)
+
+    horarios = HorarioDisponible.objects.filter(profesional__in=profesionales)
+    
+    data = list(horarios.values('id', 'fecha', 'hora_inicio', 'hora_fin', 'profesional__profesion__nombre_profesion'))
+
+    return JsonResponse(data, safe=False)
+    """
+    return render(request, 'citas/buscar_horarios.html', {
+        'form': form,
+        'profesionales': profesionales,
+        'horarios': horarios,
+    })
+    """
+    
 
 def obtener_ubicaciones_y_horarios(request, profesional_id):
     ubicaciones = Ubicacion.objects.filter(profesional_id=profesional_id)
@@ -149,3 +210,28 @@ def lista_citas_admin(request):
 
     # Devolver los datos como una respuesta JSON
     return JsonResponse(data, safe=False)
+
+### ELIMINAR CITAS ###
+from django.shortcuts import get_object_or_404, redirect
+
+@csrf_exempt
+def cancelar_cita_y_crear_horario(request, cita_id):
+    try:
+        # Obtener la cita a cancelar
+        cita = get_object_or_404(Cita, id=cita_id)
+
+        # Eliminar la cita
+        cita.delete()
+
+        # Crear un nuevo horario disponible
+        HorarioDisponible.objects.create(
+            profesional=cita.profesional,
+            fecha=cita.fecha,
+            hora_inicio=cita.hora_inicio,
+            hora_fin=cita.hora_fin
+        )
+
+        return JsonResponse({'message': 'Cita cancelada y horario disponible creado exitosamente.'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)    

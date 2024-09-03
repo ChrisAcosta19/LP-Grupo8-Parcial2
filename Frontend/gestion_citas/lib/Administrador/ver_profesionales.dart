@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'crear_profesional.dart';
 import 'editar_profesional.dart';
+import 'crear_profesional.dart';
 
 class VerProfesionales extends StatefulWidget {
-  const VerProfesionales({super.key});
+  const VerProfesionales({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _VerProfesionalesState createState() => _VerProfesionalesState();
 }
 
@@ -25,24 +24,44 @@ class _VerProfesionalesState extends State<VerProfesionales> {
   Future<void> _loadProfesionales() async {
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/usuarios/profesionales/'),
+        Uri.parse('http://localhost:8000/administrador/profesionales/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          profesionales = jsonDecode(response.body);
-          _isLoading = false; // Actualiza el estado de carga
-        });
+        if (mounted) {
+          setState(() {
+            profesionales = jsonDecode(response.body);
+            _isLoading = false;
+          });
+        }
       } else {
         print('Error al cargar profesionales');
-        // Puedes agregar un manejo de errores aquí
       }
     } catch (e) {
       print('Excepción al cargar profesionales: $e');
-      // Puedes agregar un manejo de errores aquí
+    }
+  }
+
+  Future<void> _deleteProfesional(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://localhost:8000/usuarios/eliminar/$id/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _loadProfesionales();
+        print('Profesional eliminado exitosamente');
+      } else {
+        print('Error al eliminar el profesional');
+      }
+    } catch (e) {
+      print('Excepción al eliminar profesional: $e');
     }
   }
 
@@ -54,28 +73,24 @@ class _VerProfesionalesState extends State<VerProfesionales> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Modificar'),
+              leading: Icon(Icons.edit),
+              title: Text('Modificar'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => EditarProfesionalScreen(
-                      profesional: profesional,
-                    ),
+                    builder: (context) => EditProfesionalScreen(profesional: profesional),
                   ),
-                ).then((_) {
-                  _loadProfesionales(); // Recargar la lista después de editar
-                });
+                ).then((_) => _loadProfesionales());
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete),
-              title: const Text('Eliminar'),
+              leading: Icon(Icons.delete),
+              title: Text('Eliminar'),
               onTap: () {
-                Navigator.pop(context);
                 _deleteProfesional(profesional['id']);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -84,57 +99,13 @@ class _VerProfesionalesState extends State<VerProfesionales> {
     );
   }
 
-  
-  Future<void> _deleteProfesional(int id) async {
-  try {
-    // Eliminar la relación con la profesión, si aplica
-    final deleteProfesionResponse = await http.delete(
-      Uri.parse('http://127.0.0.1:8000/usuarios/eliminar_profesion2/$id/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+  void _addProfesional() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CrearProfesionalScreen()),
     );
-
-    if (deleteProfesionResponse.statusCode != 204) {
-      print('Error al eliminar la profesión asociada');
-      return;
-    }
-
-    // Eliminar la ubicación, si aplica
-    final deleteUbicacionResponse = await http.delete(
-      Uri.parse('http://127.0.0.1:8000/ubicaciones/eliminar_ubicacion2/$id/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (deleteUbicacionResponse.statusCode != 204) {
-      print('Error al eliminar la ubicación asociada');
-      return;
-    }
-
-    // Eliminar el profesional
-    final response = await http.delete(
-      Uri.parse('http://127.0.0.1:8000/usuarios/eliminar2/$id/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 204) {
-      setState(() {
-        profesionales.removeWhere((profesional) => profesional['id'] == id);
-      });
-    } else {
-      print('Error al eliminar profesional');
-      // Manejo de errores aquí
-    }
-  } catch (e) {
-    print('Excepción al eliminar profesional: $e');
-    // Manejo de errores aquí
+    _loadProfesionales();
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -149,16 +120,7 @@ class _VerProfesionalesState extends State<VerProfesionales> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CrearProfesionalScreen(),
-                        ),
-                      ).then((_) {
-                        _loadProfesionales(); // Recargar la lista después de crear un nuevo profesional
-                      });
-                    },
+                    onPressed: _addProfesional,
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -178,15 +140,7 @@ class _VerProfesionalesState extends State<VerProfesionales> {
                             final profesional = profesionales[index];
                             return ListTile(
                               title: Text(profesional['nombre'] ?? 'Nombre no disponible'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Correo: ${profesional['correo_electronico'] ?? 'No disponible'}'),
-                                  Text('Rol: ${profesional['rol'] ?? 'No disponible'}'),
-                                  Text('Profesión: ${profesional['profesion'] ?? 'No disponible'}'),
-                                  Text('Dirección: ${profesional['direccion'] ?? 'No disponible'}'),
-                                ],
-                              ),
+                              subtitle: Text(profesional['correo_electronico'] ?? 'Correo no disponible'),
                               onTap: () {
                                 _showOptions(context, profesional);
                               },

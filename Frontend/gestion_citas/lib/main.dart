@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_citas/Cliente/agendar_citas.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Profesional/ver_citas.dart';
@@ -8,6 +9,10 @@ import 'Administrador/ver_profesionales.dart';
 import 'Administrador/ver_profesiones.dart';
 import 'Administrador/ver_citasAdmin.dart';
 import 'Administrador/ver_perfil.dart';
+import 'Profesional/crear_horario.dart';
+import 'Cliente/ver_citas.dart';
+import 'Profesional/ver_ubicaciones.dart';
+import 'Cliente/eliminar_cita.dart';
 
 
 void main() {
@@ -45,74 +50,41 @@ class _MyHomePageState extends State<MyHomePage> {
   int? idUsuario;
   String? rolUsuario;
   String? opcionSeleccionada;
-  dynamic fetchedData = List.empty(); // Variable para almacenar los datos obtenidos
+  dynamic fetchedData =
+      List.empty(); // Variable para almacenar los datos obtenidos
   dynamic fetchedUserData = {
     "nombre": "Nombre Usuario",
     "correo_electronico": "correo@example.com"
   }; // Variable para almacenar los datos del usuario
-  String? selectedDate = '2024-01-01';
+  String selectedDate = '2024-01-01';
   String? selectedProfession;
-  String? selectedHoraInicio = '00:00';
-  String? selectedHoraFin = '00:00';
+  String selectedHoraInicio = '00:00';
+  String selectedHoraFin = '00:00';
   List<String> professionNames = [];
 
   // Método para obtener datos desde el servidor
-Future<void> fetchData(String url) async {
-  try {
+  // Método para obtener datos desde el servidor
+  Future<void> fetchData(String url) async {
+    setState(() {
+      fetchedData = List.empty(); // Limpiar los datos obtenidos
+    });
     final response = await http.get(Uri.parse(url));
-    dynamic decoded = json.decode(response.body);
-
-    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
-      if (decoded is List) {
-        // Si se recibe una lista de objetos
-        setState(() {
-          fetchedData = decoded;
-        });
-      } else if (decoded is Map<String, dynamic>) {
-        // Si se recibe un solo objeto, ponlo en una lista
-        setState(() {
-          fetchedData = [decoded]; // Convierte a lista
-        });
-      } else {
-        print('Formato de JSON no reconocido.');
-      }
-    } else {
-      print('Error en la respuesta del servidor: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error al obtener los datos: $e');
-  }
-}
-
-
-Future<void> fetchUserData(String url) async {
-  try {
-    final response = await http.get(Uri.parse(url));
-    dynamic decoded = json.decode(response.body);
-
-    if (response.statusCode == 200 && !response.body.contains('<!DOCTYPE html>')) {
+    if (response.statusCode == 200 &&
+        !response.body.contains('<!DOCTYPE html>')) {
       setState(() {
-        fetchedUserData = decoded;
+        fetchedData = json.decode(response.body);
       });
-    } else {
-      print('Error en la respuesta del servidor: ${response.statusCode}');
     }
-  } catch (e) {
-    print('Error al obtener los datos del usuario: $e');
-  }
-}
-
-  String formatTimeOfDay(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final minute = time.minute.toString().padLeft(2, '0'); // Asegura dos dígitos
-    return '$hour:$minute';
   }
 
-  String formatDateTime(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final month = date.month.toString().padLeft(2, '0'); // Asegura dos dígitos
-    final year = date.year.toString();
-    return '$year-$month-$day';
+  Future<void> fetchUserData(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200 &&
+        !response.body.contains('<!DOCTYPE html>')) {
+      setState(() {
+        fetchedUserData = json.decode(response.body);
+      });
+    }
   }
 
   List<Widget> _buildMenuOptions() {
@@ -128,6 +100,8 @@ Future<void> fetchUserData(String url) async {
               'http://localhost:8000/profesional/$idUsuario/profesiones/'),
           _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
           _buildMenuItem('Cancelar Cita', Icons.delete, ''),
+          _buildMenuItem('Ver Ubicaciones', Icons.location_on,
+              'http://localhost:8000/profesional/$idUsuario/profesiones/'),
         ];
         break;
       case 'Administrador':
@@ -135,7 +109,7 @@ Future<void> fetchUserData(String url) async {
           _buildMenuItem('Clientes', Icons.people,
           'http://localhost:8000/usuarios/clientes/'),
           _buildMenuItem('Profesionales', Icons.school,
-          'http://localhost:8000/usuarios/profesionales/'),
+          'http://localhost:8000/administrador/profesionales/'),
           _buildMenuItem('Profesiones',Icons.business_center,
           'http://localhost:8000/profesiones/lista/'),
           _buildMenuItem('Citas', Icons.calendar_today,
@@ -146,8 +120,14 @@ Future<void> fetchUserData(String url) async {
         break;
       case 'Cliente':
         options = [
-          _buildMenuItem('Opción X', Icons.ac_unit, ''),
-          _buildMenuItem('Opción Y', Icons.access_alarm, ''),
+          _buildMenuItem('Ver Citas Agendadas', Icons.calendar_today,
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
+          _buildMenuItem('Agendar Cita', Icons.access_time,
+              'http://localhost:8000/usuarios/citas/horarios_disponibles/'),
+          _buildMenuItem('Reprogramar Cita', Icons.edit, ''),
+          ///Code de relocalizacion
+          _buildMenuItem('Cancelar Cita', Icons.delete, 
+              'http://localhost:8000/cliente/$idUsuario/citas/'),
         ];
         break;
       default:
@@ -168,11 +148,11 @@ Future<void> fetchUserData(String url) async {
           color: opcionSeleccionada == title ? Colors.white : Colors.black,
         ),
       ),
-      onTap: () {
+      onTap: () async {
         setState(() {
           opcionSeleccionada = title;
-          fetchData(url);
         });
+        await fetchData(url);
       },
     );
   }
@@ -192,138 +172,38 @@ Future<void> fetchUserData(String url) async {
           case 'Crear Horario':
             setState(() {
               professionNames = [];
-              try {
-                for (var profession in fetchedData) {
-                  professionNames.add(profession["profesion__nombre_profesion"]);
-                }
-              } catch (e) {
-                // ignore: avoid_print
-                print(e);
+              for (var profession in fetchedData) {
+                professionNames.add(profession["profesion__nombre_profesion"]);
               }
             });
-            child = Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Date Picker
-                            const Text('Fecha:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101),
-                                  ).then((selectedDateTime) {
-                                    if (selectedDateTime != null) {
-                                      setState(() {
-                                        selectedDate =
-                                            formatDateTime(selectedDateTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar Fecha'),
-                              ),
-                            ),
-                            Text('Fecha elegida: $selectedDate'),
-                            const SizedBox(height: 150),
-                            const Text('Seleccione la profesión:'),
-                            DropdownButton<String>(
-                              value: selectedProfession,
-                              items: professionNames.map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedProfession = newValue;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Time Picker for Start Time
-                            const Text('Hora inicio:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  ).then((selectedTime) {
-                                    if (selectedTime != null) {
-                                      setState(() {
-                                        selectedHoraInicio =
-                                            formatTimeOfDay(selectedTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar hora inicio'),
-                              ),
-                            ),
-                            Text('Hora elegida: $selectedHoraInicio'),
-                            const SizedBox(height: 150),
-                            // Time Picker for End Time
-                            const Text('Hora fin:'),
-                            SizedBox(
-                              height: 50, // Adjust height as needed
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  ).then((selectedTime) {
-                                    if (selectedTime != null) {
-                                      setState(() {
-                                        selectedHoraFin =
-                                            formatTimeOfDay(selectedTime);
-                                      });
-                                    }
-                                  });
-                                },
-                                child: const Text('Seleccionar hora fin'),
-                              ),
-                            ),
-                            Text('Hora elegida: $selectedHoraFin'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                            onPressed: () {},
-                            child: const Row(children: [
-                              Icon(Icons.add),
-                              SizedBox(width: 10),
-                              Text('Crear Horario'),
-                            ])),
-                      ]),
-                ),
-              ],
+            child = crearHorario(
+              professionNames: professionNames,
+              selectedDate: selectedDate,
+              selectedProfession: selectedProfession,
+              selectedHoraInicio: selectedHoraInicio,
+              selectedHoraFin: selectedHoraFin,
+              context: context,
+              idUsuario: idUsuario,
+              onDateChanged: (newDate) {
+                setState(() {
+                  selectedDate = newDate;
+                });
+              },
+              onProfessionChanged: (newProfession) {
+                setState(() {
+                  selectedProfession = newProfession;
+                });
+              },
+              onHoraInicioChanged: (newHoraInicio) {
+                setState(() {
+                  selectedHoraInicio = newHoraInicio;
+                });
+              },
+              onHoraFinChanged: (newHoraFin) {
+                setState(() {
+                  selectedHoraFin = newHoraFin;
+                });
+              },
             );
             break;
           case 'Reprogramar Cita':
@@ -331,6 +211,16 @@ Future<void> fetchUserData(String url) async {
             break;
           case 'Cancelar Cita':
             child = const Text('Cancelación de citas');
+            break;
+          case 'Ver Ubicaciones':
+            setState(() {
+              professionNames = [];
+              for (var profession in fetchedData) {
+                professionNames.add(profession["profesion__nombre_profesion"]);
+              }
+            });
+            child = VerUbicaciones(
+                idUsuario: idUsuario, professionNames: professionNames);
             break;
           default:
             child = const Text('Opción no válida');
@@ -345,7 +235,7 @@ Future<void> fetchUserData(String url) async {
             child = const VerProfesionales();
             break;
           case 'Profesiones':
-            child = VerProfesiones(fetchedData);
+            child = const VerProfesiones();
             break;
           case 'Citas':
             child = VerCitasAdmin(fetchedData);
@@ -358,8 +248,22 @@ Future<void> fetchUserData(String url) async {
         }
         break;
       case 'Cliente':
-        child = const Text('Menú de Cliente');
-        break;
+        switch (opcionSeleccionada) {
+          case 'Ver Citas Agendadas':
+            child = verCitasClientes(fetchedData);
+            break;
+          case 'Agendar Cita':
+            child = AgendarCita(idUsuario.toString()); //Obtencion de id para crear la cita, esto para que se consistente con mi back-end :c
+            break;
+          case 'Reprogramar Cita':
+            child = const Text('Reprogramación de citas');
+            break;
+          case 'Cancelar Cita':
+            child = CancelarCitaScreen(fetchedData: fetchedData);
+            break;
+          default:
+            child = const Text('Opción no válida');
+        }
       default:
         child = const Text('Rol no válido');
     }
@@ -375,42 +279,45 @@ Future<void> fetchUserData(String url) async {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
-                        idUsuario = 1;
+                        idUsuario = 2 ;
                         rolUsuario = 'Profesional';
                         opcionSeleccionada = 'Ver Citas';
-                        fetchData(
-                            'http://localhost:8000/profesional/$idUsuario/citas/');
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
+                      await fetchData(
+                          'http://localhost:8000/profesional/$idUsuario/citas/');
+                      await fetchUserData(
+                          'http://localhost:8000/usuarios/$idUsuario/buscar/');
                     },
                     child: const Text('Profesional'),
                   ),
                   const SizedBox(width: 20), // Espacio entre los botones
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
-                        idUsuario = 2;
+                        idUsuario = 1;
                         rolUsuario = 'Cliente';
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
+                        opcionSeleccionada = 'Ver Citas Agendadas';  
                       });
+                      await fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
+                      await fetchData(
+                            'http://localhost:8000/cliente/$idUsuario/citas/');
                     },
                     child: const Text('Cliente'),
                   ),
                   const SizedBox(width: 20), // Espacio entre los botones
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         idUsuario = 3;
                         rolUsuario = 'Administrador';
                         opcionSeleccionada = 'Clientes';
-                        fetchData('http://localhost:8000/usuarios/clientes/');
-                        fetchUserData(
-                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                       });
+                      await fetchData('http://localhost:8000/usuarios/clientes/');
+                      await fetchUserData(
+                            'http://localhost:8000/usuarios/$idUsuario/buscar/');
                     },
                     child: const Text('Administrador'),
                   ),
@@ -425,7 +332,8 @@ Future<void> fetchUserData(String url) async {
                       children: [
                         UserAccountsDrawerHeader(
                           accountName: Text(fetchedUserData['nombre']),
-                          accountEmail: Text(fetchedUserData['correo_electronico']),
+                          accountEmail:
+                              Text(fetchedUserData['correo_electronico']),
                           currentAccountPicture: const CircleAvatar(
                             backgroundImage:
                                 AssetImage('lib/images/avatar.png'),
@@ -433,7 +341,8 @@ Future<void> fetchUserData(String url) async {
                         ),
                         if (rolUsuario == 'Administrador')
                           const Padding(
-                            padding: EdgeInsets.all(8.0), // Ajustar el padding según sea necesario
+                            padding: EdgeInsets.all(
+                                8.0), // Ajustar el padding según sea necesario
                             child: Text(
                               'ADMINISTRADOR',
                               style: TextStyle(

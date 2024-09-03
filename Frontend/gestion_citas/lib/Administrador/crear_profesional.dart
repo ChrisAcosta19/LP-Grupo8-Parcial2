@@ -8,163 +8,123 @@ class CrearProfesionalScreen extends StatefulWidget {
 }
 
 class _CrearProfesionalScreenState extends State<CrearProfesionalScreen> {
-  final _nombreController = TextEditingController();
-  final _correoController = TextEditingController();
-  final _contrasenaController = TextEditingController();
-  final _direccionController = TextEditingController();
-  String? _selectedProfesion;
-  List<dynamic> _profesiones = [];
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nombreController;
+  late TextEditingController _correoController;
+  late TextEditingController _contrasenaController;
 
   @override
   void initState() {
     super.initState();
-    _loadProfesiones();
+    _nombreController = TextEditingController();
+    _correoController = TextEditingController();
+    _contrasenaController = TextEditingController();
   }
 
-  Future<void> _loadProfesiones() async {
-    final response = await http.get(
-      Uri.parse('http://localhost:8000/profesiones/lista/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _profesiones = jsonDecode(response.body);
-      });
-    } else {
-      print('Error al cargar profesiones');
-    }
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _correoController.dispose();
+    _contrasenaController.dispose();
+    super.dispose();
   }
 
-  Future<void> _guardarProfesional() async {
-    // Verificar que todos los campos obligatorios estén llenos
-    if (_nombreController.text.isEmpty || _correoController.text.isEmpty || _contrasenaController.text.isEmpty || _selectedProfesion == null) {
-      print('Por favor complete todos los campos');
-      return;
-    }
-
-    // Primero, crear el usuario
-    final usuarioResponse = await http.post(
-      Uri.parse('http://localhost:8000/usuarios/crear_profesional/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({
-        'nombre': _nombreController.text,
-        'correo_electronico': _correoController.text,
-        'contrasena': _contrasenaController.text,
-        'rol': 'Profesional',
-      }),
-    );
-
-    if (usuarioResponse.statusCode == 201) {
-      // Buscar el ID del usuario creado
-      final nombreUsuario = _nombreController.text;
-      final idResponse = await http.get(
-        Uri.parse('http://localhost:8000/usuarios/obtener_id/?nombre=$nombreUsuario'),
-      );
-
-      if (idResponse.statusCode == 200) {
-        final usuarioId = jsonDecode(idResponse.body)['id'];
-
-        // Crear el registro en profesionales_profesional
-        final profesionId = _profesiones.firstWhere((p) => p['nombre_profesion'] == _selectedProfesion)['id'];
-        final profesionalesResponse = await http.post(
-          Uri.parse('http://localhost:8000/usuarios/asignar_profesion/'),
+  Future<void> _crearProfesional() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final response = await http.post(
+          Uri.parse('http://localhost:8000/usuarios/crear_profesional/'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode({
-            'profesion_id': profesionId,
-            'usuario_id': usuarioId,
+          body: jsonEncode(<String, dynamic>{
+            'nombre': _nombreController.text,
+            'correo_electronico': _correoController.text,
+            'contrasena': _contrasenaController.text,
           }),
         );
 
-        if (profesionalesResponse.statusCode == 201) {
-          // Crear el registro en ubicaciones_ubicacion (opcional)
-          if (_direccionController.text.isNotEmpty) {
-            final ubicacionResponse = await http.post(
-              Uri.parse('http://localhost:8000/ubicaciones/crear/'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-              },
-              body: jsonEncode({
-                'direccion': _direccionController.text,
-                'usuario_id': usuarioId, // Asegúrate de que el ID de usuario es el correcto aquí
-              }),
-            );
-
-            if (ubicacionResponse.statusCode == 201) {
-              Navigator.of(context).pop(); // Regresa a la pantalla anterior
-            } else {
-              print('Error al guardar la ubicación');
-            }
-          } else {
-            Navigator.of(context).pop(); // Regresa a la pantalla anterior si no se proporciona dirección
-          }
+        if (response.statusCode == 201) {
+          Navigator.pop(context, true);
         } else {
-          print('Error al guardar el profesional');
+          _showError('Error al crear el profesional');
         }
-      } else {
-        print('Error al obtener el ID del usuario');
+      } catch (e) {
+        _showError('Excepción al crear profesional: $e');
       }
-    } else {
-      print('Error al crear el usuario');
     }
   }
 
-
+  void _showError(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Profesional'),
+        title: const Text('Crear Profesional'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-            ),
-            TextField(
-              controller: _correoController,
-              decoration: const InputDecoration(labelText: 'Correo Electrónico'),
-            ),
-            TextField(
-              controller: _contrasenaController,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
-              obscureText: true,
-            ),
-            DropdownButton<String>(
-              value: _selectedProfesion,
-              hint: const Text('Seleccione Profesión'),
-              items: _profesiones.map((profesion) {
-                return DropdownMenuItem<String>(
-                  value: profesion['nombre_profesion'],
-                  child: Text(profesion['nombre_profesion']),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedProfesion = value;
-                });
-              },
-            ),
-            TextField(
-              controller: _direccionController,
-              decoration: const InputDecoration(labelText: 'Dirección'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _guardarProfesional,
-              child: const Text('Guardar'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nombreController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese un nombre';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _correoController,
+                decoration: const InputDecoration(labelText: 'Correo Electrónico'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese un correo electrónico';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _contrasenaController,
+                decoration: const InputDecoration(labelText: 'Contraseña'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese una contraseña';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _crearProfesional,
+                child: const Text('Guardar'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,0 +1,18 @@
+<form method="get">
+    {{ form.as_p }}
+    <button type="submit">Buscar</button>
+</form>
+
+<h2>Horarios Disponibles:</h2>
+<ul>
+    {% for horario in horarios %}
+        <li>
+            Fecha: {{ horario.fecha }} - 
+            Hora: {{ horario.hora_inicio }} a {{ horario.hora_fin }} - 
+            Profesional: {{ horario.profesional.usuario.nombre }} - 
+            Profesión: {{ horario.profesional.profesion.nombre_profesion }}
+        </li>
+    {% empty %}
+        <li>No se encontraron horarios disponibles.</li>
+    {% endfor %}
+</ul>

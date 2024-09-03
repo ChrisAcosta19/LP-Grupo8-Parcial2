@@ -52,3 +52,14 @@ def consultar_profesiones(request, usuario_id):
     profesiones = Profesional.objects.filter(usuario_id=usuario_id)
     data = list(profesiones.values('id', 'usuario__nombre', 'profesion__nombre_profesion'))
     return JsonResponse(data, safe=False)
+
+
+def obtener_id_profesional(request, usuario_id, profesion_id):
+    profesional = Profesional.objects.get(usuario_id=usuario_id, profesion_id=profesion_id)
+    data = {
+        'id': profesional.id,
+        'usuario_id': profesional.usuario_id,
+        'usuario_nombre': profesional.usuario.nombre,
+        'profesion_nombre': profesional.profesion.nombre_profesion
+    }
+    return JsonResponse(data, safe=False)
